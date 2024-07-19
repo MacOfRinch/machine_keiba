@@ -1,5 +1,5 @@
 # coding: UTF-8
-from keiba_app import app
+from keiba_app.main import app
 from flask import render_template
 from flask import request
 
