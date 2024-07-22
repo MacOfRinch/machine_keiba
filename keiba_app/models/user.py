@@ -1,4 +1,4 @@
-from keiba_app.main import db
+from main import db
 from datetime import datetime as dt
 
 class User(db.Model):

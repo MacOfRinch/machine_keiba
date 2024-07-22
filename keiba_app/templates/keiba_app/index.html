@@ -2,5 +2,25 @@
 
 {% block content %}
 <h1>オラ競馬予想すっぞ！</h1>
-<img src="{{ url_for('static', filename='images/ゼルダ壁紙.jpeg') }}" alt="">
+<div class="container-fluid">
+  <div class="center-block mt-4 mb-2">
+    <div class="text-center">
+      <h2>直近半年間のレース一覧</h2>
+    </div>
+    <table border="1">
+      <tr>
+        <th>レース開催日</th>
+        <th>レースid</th>
+      </tr>
+      <tbody>
+        {% for data in race_data %}
+        <tr>
+          <td>{{ data.race_date }}</td>
+          <td><a href="{{ url_for('show_race_detail', race_id=data.race_id) }}">{{ data.race_id }}</a></td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
 {% endblock %}
