@@ -9,6 +9,8 @@
 # migrate = Migrate(app, db)
 
 from keiba_app import app
+from keiba_app import load_model
 
 if __name__ == '__main__':
+  load_model()
   app.run()
