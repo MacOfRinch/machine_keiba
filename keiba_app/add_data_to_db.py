@@ -44,10 +44,10 @@ with app.app_context():
   for _, row in jockey_df.iterrows():
     jockey_data = JockeyModel(
       jockey_id=row['騎手id'],
-      old=row['騎手年齢'],
-      top_ratio=row['騎手直近単勝率'],
-      victory_ratio=row['騎手直近複勝率'],
-      experience=row['騎手経験値'],
+      old=row['年齢'],
+      top_ratio=row['単勝'],
+      victory_ratio=row['複勝'],
+      experience=row['経験'],
       expires_at=dt.today()+relativedelta(months=6)
     )
     db.session.add(jockey_data)
