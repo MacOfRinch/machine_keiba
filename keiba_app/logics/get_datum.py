@@ -12,17 +12,16 @@ from ..models.jockey import JockeyModel
 half_year_later = dt.now() + relativedelta(months=6)
 this_year = int(dt.today().year)
 
-class Scraper:
-
+class UpdateDatum:
   @staticmethod
-  def get_race_data(race_id: str):
+  def get_race_data(race_id: str) -> None:
     url = "https://db.netkeiba.com/race/" + race_id + "/"
 
     response = requests.get(url)
     response.encoding = "EUC-JP"
 
     df = pd.read_html(response.text)[0]
-    # 半角スペースがあったら除去するよ〜
+    # 半角スペースがあったら除去
     df = df.rename(columns=lambda x: x.replace(' ', ''))
     df['predict_flag'] = True
 
@@ -70,9 +69,10 @@ class Scraper:
         )
         db.session.add(race_data)
       db.session.commit()
+    return
 
   @staticmethod
-  def get_horse_data(horse_id: str):
+  def get_horse_data(horse_id: str) -> None:
     url = 'https://db.netkeiba.com/horse/' + horse_id + '/'
     response = requests.get(url)
     response.encoding = 'EUC-JP'
@@ -104,9 +104,10 @@ class Scraper:
       )
       db.session.add(horse_data)
       db.session.commit()
+    return
 
   @staticmethod
-  def get_jockey_data(jockey_id: str):
+  def get_jockey_data(jockey_id: str) -> None:
     url = 'https://db.netkeiba.com/jockey/result/' + jockey_id + '/'
     response = requests.get(url)
     response.encoding = 'EUC-JP'
@@ -142,3 +143,4 @@ class Scraper:
       )
       db.session.add(jockey_data)
       db.session.commit()
+    return

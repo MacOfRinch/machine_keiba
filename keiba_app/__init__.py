@@ -18,4 +18,6 @@ migrate = Migrate(app, db)
 from .models.race_result import RaceResultModel
 from .models.horse import HorseModel
 from .models.jockey import JockeyModel
+from .logics.get_datum import UpdateDatum
+from .logics.new_race import NewRace
 from keiba_app import views

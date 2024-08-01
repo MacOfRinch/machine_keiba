@@ -7,6 +7,7 @@ from keiba_app import db
 # from ..logics.get_datum import half_year_later
 # half_year_later = dt.now() + relativedelta(months=6)
 
+#テストデータ入力用
 db.metadata.clear()
 
 class RaceResultModel(db.Model):

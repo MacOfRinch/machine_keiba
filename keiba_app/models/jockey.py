@@ -11,8 +11,7 @@ class JockeyModel(db.Model):
   experience = db.Column(db.Integer)
   expires_at = db.Column(db.Date, nullable=False)
 
-  def __init__(self, id, jockey_id, old, top_ratio, victory_ratio, experience, expires_at):
-    self.id = id
+  def __init__(self, jockey_id, old, top_ratio, victory_ratio, experience, expires_at):
     self.jockey_id = jockey_id
     self.old = old
     self.top_ratio = top_ratio

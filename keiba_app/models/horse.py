@@ -8,8 +8,7 @@ class HorseModel(db.Model):
   order_ave = db.Column(db.Float)
   expires_at = db.Column(db.Date, nullable=False)
 
-  def __init__(self, id, horse_id, order_ave, expires_at):
-    self.id = id
+  def __init__(self, horse_id, order_ave, expires_at):
     self.horse_id = horse_id
     self.order_ave = order_ave
     self.expires_at = expires_at
