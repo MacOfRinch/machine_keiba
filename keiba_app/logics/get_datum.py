@@ -9,7 +9,7 @@ from ..models.race_result import RaceResultModel
 from ..models.horse import HorseModel
 from ..models.jockey import JockeyModel
 
-half_year_later = dt.now() + relativedelta(months=6)
+half_year_later = dt.today() + relativedelta(months=6)
 this_year = int(dt.today().year)
 
 class UpdateDatum:
@@ -65,7 +65,7 @@ class UpdateDatum:
           jockey_id=row['jockey_id'],
           odds=row['単勝'],
           race_date=row['race_date'],
-          expires_at=half_year_later
+          expires_at=row['race_date']+relativedelta(months=6) 
         )
         db.session.add(race_data)
       db.session.commit()

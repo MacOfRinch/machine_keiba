@@ -4,7 +4,7 @@ from keiba_app import db
 class JockeyModel(db.Model):
   __tablename__ = 'jockey'
   id = db.Column(db.Integer, primary_key=True)
-  jockey_id = db.Column(db.String(255))
+  jockey_id = db.Column(db.String(255), unique=True)
   old = db.Column(db.Integer)
   top_ratio = db.Column(db.Float)
   victory_ratio = db.Column(db.Float)
