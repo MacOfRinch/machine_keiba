@@ -4,7 +4,7 @@ from keiba_app import db
 class HorseModel(db.Model):
   __tablename__ = 'horse'
   id = db.Column(db.Integer, primary_key=True)
-  horse_id = db.Column(db.String(255))
+  horse_id = db.Column(db.String(255), unique=True)
   order_ave = db.Column(db.Float)
   expires_at = db.Column(db.Date, nullable=False)
 
