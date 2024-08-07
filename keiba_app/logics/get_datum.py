@@ -14,7 +14,7 @@ this_year = int(dt.today().year)
 
 class UpdateDatum:
   @staticmethod
-  def get_race_data(race_id: str) -> None:
+  def get_race_data(race_id: str) -> dict:
     url = "https://db.netkeiba.com/race/" + race_id + "/"
 
     response = requests.get(url)
@@ -53,7 +53,7 @@ class UpdateDatum:
     df['horse_id'] = horse_id_list
     df['jockey_id'] = jockey_id_list
     df.index = [race_id] * len(df)
-    
+
     with app.app_context():
       for _, row in df.iterrows():
         race_data = RaceResultModel(
@@ -65,11 +65,12 @@ class UpdateDatum:
           jockey_id=row['jockey_id'],
           odds=row['単勝'],
           race_date=row['race_date'],
-          expires_at=row['race_date']+relativedelta(months=6) 
+          expires_at=row['race_date']+relativedelta(months=6),
+          predict_flag=row['predict_flag']
         )
         db.session.add(race_data)
       db.session.commit()
-    return
+    return {'horse_id_list': horse_id_list, 'jockey_id_list': jockey_id_list}
 
   @staticmethod
   def get_horse_data(horse_id: str) -> None:
@@ -97,12 +98,17 @@ class UpdateDatum:
       order_ave = 0
     
     with app.app_context():
-      horse_data = HorseModel(
-        horse_id=horse_id,
-        order_ave=order_ave,
-        expires_at=half_year_later
-      )
-      db.session.add(horse_data)
+      horse_info = db.session.query(HorseModel).filter(HorseModel.horse_id == horse_id).first()
+      if horse_info:
+        horse_info.order_ave = order_ave
+        horse_info.expires_at = half_year_later
+      else:
+        horse_data = HorseModel(
+          horse_id=horse_id,
+          order_ave=order_ave,
+          expires_at=half_year_later
+        )
+        db.session.add(horse_data)
       db.session.commit()
     return
 
@@ -133,14 +139,22 @@ class UpdateDatum:
     victory_ratio = sum(victory_count) / sum(runs)
     experience = sum(runs)
     with app.app_context():
-      jockey_data = JockeyModel(
-        jockey_id=jockey_id,
-        old=old,
-        top_ratio=top_ratio,
-        victory_ratio=victory_ratio,
-        experience=experience,
-        expires_at=half_year_later
-      )
-      db.session.add(jockey_data)
+      jockey_info = db.session.query(JockeyModel).filter(JockeyModel.jockey_id == jockey_id).first()
+      if jockey_info:
+        jockey_info.old = old
+        jockey_info.top_ratio = top_ratio
+        jockey_info.victory_ratio = victory_ratio
+        jockey_info.experience = experience
+        jockey_info.expires_at = half_year_later
+      else:
+        jockey_data = JockeyModel(
+          jockey_id=jockey_id,
+          old=old,
+          top_ratio=top_ratio,
+          victory_ratio=victory_ratio,
+          experience=experience,
+          expires_at=half_year_later
+        )
+        db.session.add(jockey_data)
       db.session.commit()
     return

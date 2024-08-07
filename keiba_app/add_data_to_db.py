@@ -5,7 +5,7 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from keiba_app import db
 from keiba_app import app
 import pandas as pd
-from datetime import datetime as dt
+from datetime import date as dt
 from dateutil.relativedelta import relativedelta
 from models.race_result import RaceResultModel
 from models.horse import HorseModel
