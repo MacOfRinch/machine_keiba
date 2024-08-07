@@ -2,10 +2,12 @@ from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 import joblib
+import os
 
 app = Flask(__name__)
 app.config.from_object('keiba_app.config')
 model = None
+app.secret_key = os.getenv('SECRET_KEY')
 
 def load_model():
   global model

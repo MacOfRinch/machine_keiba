@@ -13,7 +13,7 @@ db.metadata.clear()
 class RaceResultModel(db.Model):
   __tablename__ = 'race_result'
   id = db.Column(db.Integer, primary_key=True)
-  race_id = db.Column(db.String(255), unique=True)
+  race_id = db.Column(db.String(255))
   order = db.Column(db.String(255))
   horse_name = db.Column(db.String(255))
   horse_id = db.Column(db.String(255))
