@@ -2,6 +2,7 @@ from dotenv import load_dotenv
 import os
 
 DEBUG = True
+JSON_AS_ASCII = False
 
 # DB接続設定
 load_dotenv()

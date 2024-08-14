@@ -18,3 +18,4 @@ class DeleteDatum:
       db.session.delete(expired_race_datum)
       db.session.delete(expired_horse_datum)
       db.session.delete(expired_jockey_datum)
+      db.session.commit()

@@ -14,7 +14,7 @@ from selenium import webdriver
 
 class NewRace:
   @staticmethod
-  def get_new_race_ids(date: str) -> list:
+  def get_new_race_infomations(date: str) -> list:
     options = webdriver.ChromeOptions()
     options.add_argument('--headless')
     options.add_argument('--disable-gpu')
@@ -23,33 +23,38 @@ class NewRace:
     driver = webdriver.Chrome(options=options)
     url = 'https://race.netkeiba.com/top/?kaisai_date=' + date
     driver.get(url)
-    html = driver.page_source.encode('utf-8')
+    html = driver.page_source
 
     soup = BeautifulSoup(html, 'html.parser')
-    race_id_list = []
 
+    infomations = []
     link_list = soup.find('div', attrs={'class': 'RaceList_Box'}).find_all('a', attrs={'href': re.compile(r'^../race/(shutuba|result)\.html')})
     for link in link_list:
+      title = link.select('span.ItemTitle')[0].text
       race_id = ''.join(re.findall(r'\d+', link['href']))
-      race_id_list.append(race_id)
-    return race_id_list
+      infomations.append({'title': title, 'race_id': race_id})
+    return infomations
 
   @staticmethod
   def scrape(new_race_id) -> pd.DataFrame:
     url = 'https://race.netkeiba.com/race/shutuba.html?race_id=' + new_race_id
     try:
-      response = requests.get(url)
-      response.encoding = 'EUC-JP'
+      options = webdriver.ChromeOptions()
+      options.add_argument('--headless')
+      options.add_argument('--disable-gpu')
+      options.add_argument('--hide-scrollbars')
+      options.add_argument('--no-sandbox')
+      driver = webdriver.Chrome(options=options)
+      driver.get(url)
+      html = driver.page_source
 
-      soup = BeautifulSoup(response.text, 'html.parser')
-      main_text = soup.select('div.RaceList_Item02 h1')
+      soup = BeautifulSoup(html, 'html.parser')
+      main_text = soup.select('div.RaceList_Item02 h1')[0].text
       predict_flag = True
-      if '新馬' in main_text:
-        predict_flag = False
-      elif '未出走' in main_text:
+      if ('新馬' in main_text) or ('未出走' in main_text):
         predict_flag = False
       
-      df = pd.read_html(response.text)[0]
+      df = pd.read_html(html)[0]
       df = df.rename(columns=lambda x: x.replace(' ', ''))
 
       horse_id_list = []
