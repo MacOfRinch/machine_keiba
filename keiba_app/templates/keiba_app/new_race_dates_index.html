@@ -3,14 +3,11 @@
 {% block content %}
 <div class="center-block">
   <h1 class="text-center">オラ競馬予想すっぞ！</h1>
-  <div class="fixed-top">
-    <a href="{{ url_for('new_race_date_index') }}">新しいレース日程</a>
-  </div>
 </div>
 <div class="container-fluid">
   <div class="center-block mt-4 mb-2">
     <div class="text-center">
-      <h2>直近半年間のレース一覧</h2>
+      <h2>直近のレース日程はこちら！</h2>
     </div>
     <div class="container">
       <div class="row">
@@ -19,13 +16,11 @@
           <table class="table table-striped text-center">
             <tr>
               <th>レース開催日</th>
-              <th>レースid</th>
             </tr>
             <tbody>
-              {% for data in race_data %}
+              {% for date in race_dates %}
               <tr>
-                <td>{{ data.race_date }}</td>
-                <td><a href="{{ url_for('show_race_detail', race_id=data.race_id) }}">{{ data.race_id }}</a></td>
+                <td><a href="{{ url_for('new_race_id_index', race_date=date) }}">{{ date }}</a></td>
               </tr>
               {% endfor %}
             </tbody>

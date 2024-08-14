@@ -1,0 +1,32 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="center-block">
+  <h1 class="text-center">オラ競馬予想すっぞ！</h1>
+</div>
+<div class="container-fluid">
+  <div class="center-block mt-4 mb-2">
+    <div class="text-center">
+      <h2>レースid: {{ race_id }} のレースはこちら！</h2>
+      {% with messages = get_flashed_messages() %}
+      {% if messages %}
+      <ul>
+        {% for message in messages %}
+        <li>{{ message }}</li>
+        {% endfor %}
+      </ul>
+      {% endif %}
+      {% endwith %}
+    </div>
+    <div class="container">
+      <div class="row">
+        <div class="col-2"></div>
+        <div class="col-8">
+          {{ table | safe }}
+        </div>
+        <div class="col-2"></div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
