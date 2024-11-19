@@ -12,7 +12,7 @@ from models.horse import HorseModel
 from models.jockey import JockeyModel
 
 df = pd.read_pickle('../DATA/df_for_db_20240721.pkl')
-horse_df = pd.read_pickle('../DATA/horse_df_for_db_20240801.pkl')
+horse_df = pd.read_pickle('../DATA/horse_df_for_db_20240801_kai.pkl')
 jockey_df = pd.read_pickle('../DATA/jockey_df_for_db_20240801.pkl')
 with app.app_context():
   db.drop_all()
@@ -24,6 +24,8 @@ with app.app_context():
       order=row['order'],
       horse_id=row['horse_id'],
       horse_name=row['horse_name'],
+      horse_number=row['馬番'],
+      box_number=row['枠番'],
       jockey_id=row['jockey_id'],
       jockey_name=row['jockey_name'],
       odds=row['odds'],
@@ -36,7 +38,7 @@ with app.app_context():
   for _, row in horse_df.iterrows():
     horse_data = HorseModel(
       horse_id=row['horse_id'],
-      order_ave=row['order_ave'],
+      order_ave_info=row['order_ave'],
       expires_at=dt.today()+relativedelta(months=6)
     )
     db.session.add(horse_data)

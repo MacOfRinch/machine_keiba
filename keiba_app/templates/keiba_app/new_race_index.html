@@ -31,7 +31,7 @@
               {% for info in race_infomations %}
               <tr>
                 <td><a href="{{ url_for('show_new_race', race_id=info.race_id) }}">{{ info.race_id }}</a></td>
-                <td>{{ info.title }}</td>
+                <td>{{ info.race_title }}</td>
               </tr>
               {% endfor %}
             </tbody>

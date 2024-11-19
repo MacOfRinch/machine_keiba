@@ -32,7 +32,7 @@
               <tr>
                 <td>{{ date }}</td>
                 <td>
-                  <form action="{{ url_for('get_new_datum', date=date) }}", method="POST">
+                  <form action="{{ url_for('get_new_datum', race_date=date) }}", method="POST">
                     <button type="submit" class="btn btn-primary">データ取得</button>
                   </form>
                 </td>
