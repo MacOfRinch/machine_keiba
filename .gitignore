@@ -2,3 +2,5 @@ DATA/
 PROGRAM/
 .env
 venv/
+temporary.py
+temporary_horse_ids.pkl

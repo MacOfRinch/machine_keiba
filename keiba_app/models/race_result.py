@@ -13,25 +13,31 @@ db.metadata.clear()
 class RaceResultModel(db.Model):
   __tablename__ = 'race_result'
   id = db.Column(db.Integer, primary_key=True)
+  race_title = db.Column(db.String(255))
   race_id = db.Column(db.String(255))
   order = db.Column(db.String(255))
   horse_name = db.Column(db.String(255))
   horse_id = db.Column(db.String(255))
+  horse_number = db.Column(db.String(255))
+  box_number = db.Column(db.String(255))
   jockey_name = db.Column(db.String(255))
   jockey_id = db.Column(db.String(255))
   odds = db.Column(db.String(255))
   race_date = db.Column(db.Date, nullable=False)
   expires_at = db.Column(db.Date, nullable=False)
-  predict_frag = db.Column(db.Boolean, nullable=False, default=True)
+  predict_flag = db.Column(db.Boolean, nullable=False, default=True)
 
-  def __init__(self, race_id, order, horse_name, horse_id, jockey_name, jockey_id, odds, race_date, expires_at, predict_flag):
+  def __init__(self, race_title, race_id, order, horse_name, horse_id, horse_number, box_number, jockey_name, jockey_id, odds, race_date, expires_at, predict_flag):
+    self.race_title = race_title
     self.race_id = race_id
     self.order = order
     self.horse_name = horse_name
     self.horse_id = horse_id
+    self.horse_number = horse_number
+    self.box_number = box_number
     self.jockey_name = jockey_name
     self.jockey_id = jockey_id
     self.odds = odds
     self.race_date = race_date
     self.expires_at = expires_at
-    self.predict_frag = predict_flag
+    self.predict_flag = predict_flag
