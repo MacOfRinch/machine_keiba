@@ -1,4 +1,4 @@
-from flask import Flask
+from flask import Flask, g
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 import joblib
@@ -7,8 +7,8 @@ import os
 app = Flask(__name__)
 app.config.from_object('keiba_app.config')
 # 暫定対応：ここはNoneで初期化してload_modelで読み込んだ値をviews.pyで使いたい
-# model = None
-model = joblib.load('./keiba_app/trained_model/keiba_model.pkl')
+model = None
+# model = joblib.load('./keiba_app/trained_model/keiba_model.pkl')
 app.secret_key = os.getenv('SECRET_KEY')
 
 def load_model():
@@ -20,6 +20,10 @@ def load_model():
 
 db = SQLAlchemy(app)
 migrate = Migrate(app, db)
+
+@app.before_request
+def setup_model():
+  g.model = load_model()
 
 from .models.race_result import RaceResultModel
 from .models.horse import HorseModel

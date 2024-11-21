@@ -17,15 +17,21 @@
         <div class="col-3"></div>
         <div class="col-6">
           <table class="table table-striped text-center">
-            <tr>
+            <tr class="sticky-top">
               <th>レース開催日</th>
               <th>レースid</th>
+              <th>予測精度</th>
             </tr>
             <tbody>
               {% for data in race_data %}
               <tr>
                 <td>{{ data.race_date }}</td>
                 <td><a href="{{ url_for('show_race_detail', race_id=data.race_id) }}">{{ data.race_id }}</a></td>
+                {% if data.predict_flag == True %}
+                <td>OK</td>
+                {% elif data.predict_flag == False %}
+                <td>不十分</td>
+                {% endif %}
               </tr>
               {% endfor %}
             </tbody>

@@ -53,8 +53,9 @@ class NewRace:
       db.session.commit()
 
   @staticmethod
-  def scrape(new_race_id: str) -> list:
-    url = 'https://race.netkeiba.com/race/shutuba.html?race_id=' + new_race_id
+  def scrape(new_race_id: str) -> dict:
+    race_url = 'https://race.netkeiba.com/race/shutuba.html?race_id=' + new_race_id
+    odds_url = 'https://race.netkeiba.com/odds/index.html?race_id=' + new_race_id
     # try:
     options = webdriver.ChromeOptions()
     options.add_argument('--headless')
@@ -62,40 +63,41 @@ class NewRace:
     options.add_argument('--hide-scrollbars')
     options.add_argument('--no-sandbox')
     driver = webdriver.Chrome(options=options)
-    driver.get(url)
+    # 出馬表を取得
+    driver.get(race_url)
     time.sleep(3)
-    html = driver.page_source
+    race_html = driver.page_source
+    race_soup = BeautifulSoup(race_html, 'html.parser')
+    # オッズのページ内容を取得
+    driver.get(odds_url)
+    time.sleep(3)
+    odds_html = driver.page_source
+    odds_soup = BeautifulSoup(odds_html, 'html.parser')
 
-    soup = BeautifulSoup(html, 'html.parser')
-    main_text = soup.select('div.RaceList_Item02 h1')[0].text
+    main_text = race_soup.select('div.RaceList_Item02 h1')[0].text
     predict_flag = True
     if ('新馬' in main_text) or ('未出走' in main_text):
       predict_flag = False
-    tables = soup.find_all('table')
-    race_data = str(tables[0])
-    return_table_1 = str(tables[1])
-    return_table_2 = str(tables[2])
-    df = pd.read_html(StringIO(race_data))[0]
-    df = df.rename(columns=lambda x: x.replace(' ', ''))
-    # return_df_1 = pd.read_html(StringIO(return_table_1))[0]
-    # return_df_2 = pd.read_html(StringIO(return_table_2))[0]
-    # return_df = pd.concat([return_df_1, return_df_2])
-    # return_df.columns = ['買い方', '馬番・枠番', '払戻金額', '人気']
-    # print(return_df)
+    shutuba_table = race_soup.find('table', attrs={'class': 'Shutuba_Table'})
+    str_race_table = str(shutuba_table)
+    race_df = pd.read_html(StringIO(str_race_table))[0]
+    race_df = race_df.rename(columns=lambda x: x.replace(' ', ''))
+    # 確認用 後で消すよ
+    print(race_df)
     horse_id_list = []
     jockey_id_list = []
-    horse_link_list = soup.find('table', attrs={'class': 'Shutuba_Table'}).find_all('a', attrs={'href': re.compile(r'^https://db.netkeiba.com/horse/\d+')})
+    horse_link_list = race_soup.find('table', attrs={'class': 'Shutuba_Table'}).find_all('a', attrs={'href': re.compile(r'^https://db.netkeiba.com/horse/\d+')})
     for horse_link in horse_link_list:
       horse_id = ''.join(re.findall(r'\d+', horse_link['href']))
       horse_id_list.append(horse_id)
         
-    jockey_link_list = soup.find('table', attrs={'class': 'Shutuba_Table'}).find_all('a', attrs={'href': re.compile(r'^https://db.netkeiba.com/jockey/result/recent/\d+')})
+    jockey_link_list = race_soup.find('table', attrs={'class': 'Shutuba_Table'}).find_all('a', attrs={'href': re.compile(r'^https://db.netkeiba.com/jockey/result/recent/\d+')})
     for jockey_link in jockey_link_list:
       jockey_id = ''.join(re.findall(r'\d+', jockey_link['href']))
       jockey_id_list.append(jockey_id)
 
-    df['horse_id'] = horse_id_list
-    df['jockey_id'] = jockey_id_list
+    race_df['horse_id'] = horse_id_list
+    race_df['jockey_id'] = jockey_id_list
     got_horse_ids = [horse_id[0] for horse_id in db.session.query(HorseModel.horse_id).all()]
     for horse_id in horse_id_list:
       if not horse_id in got_horse_ids:
@@ -106,11 +108,20 @@ class NewRace:
       if not jockey_id in got_jockey_ids:
         print('騎手のデータが足らないよ！')
         predict_flag = False
-    df['predict_flag'] = [predict_flag] * len(df)
+    race_df['predict_flag'] = [predict_flag] * len(race_df)
+
+    # 現時点では単勝・複勝のみ
+    odds_table = odds_soup.find('table', attrs={'class': 'RaceOdds_HorseList_Table', 'id': 'Ninki'})
+    str_odds_table = str(odds_table)
+    odds_df = pd.read_html(StringIO(str_odds_table))
+    odds_df = odds_df.rename(columns=lambda x: x.replace(' ', ''))
+    # 確認用 あとで消すよ
+    print(odds_df)
     # except Exception as e:
     #   print(e)
     #   return
-    return [df, None]
+    updated_at = dt.now().strftime('%m/%d %H:%M:%S')
+    return {'race_df': race_df, 'odds_df': odds_df, 'updated_at': updated_at}
   
   @staticmethod
   def analyze(race_date: str, df: pd.DataFrame) -> pd.DataFrame | None:

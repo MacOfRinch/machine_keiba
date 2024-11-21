@@ -1,5 +1,4 @@
 # 未取得のレースデータと馬・騎手データをスクレイピングしてDBに保存するプログラム
-# 毎週月曜AM3時に定期実行
 import sys
 import os
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
