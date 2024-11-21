@@ -4,33 +4,29 @@
 <div class="container-fluid">
   <div class="center-block">
     <div class="text-center">
-      <h2>開催日: {{ race_data.first().race_date }}</h2>
-      <p>レースid: {{ race_data.first().race_id }}</p>
+      <h2>開催日: 不明</h2>
+      <p>レースid: {{ race_id }}(現状このレースの予定はありません)</p>
     </div>
     <div class="container">
       <div class="row">
         <div class="col-lg-3"></div>
-        <div class="col-lg-6 col-sm-12">
+        <div class="col-lg-6">
           <table class="table table-striped text-center">
             <thead>
               <tr>
                 <th>着順</th>
-                <th>馬番</th>
                 <th>馬名</th>
                 <th>騎手</th>
                 <th>単勝オッズ</th>
               </tr>
             </thead>
             <tbody>
-              {% for data in race_data %}
               <tr>
-                <td>{{ data.order }}</td>
-                <td>{{ data.horse_number }}</td>
-                <td>{{ data.horse_name }}</td>
-                <td>{{ data.jockey_name }}</td>
-                <td>{{ data.odds }}</td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
               </tr>
-              {% endfor %}
             </tbody>
           </table>
         </div>

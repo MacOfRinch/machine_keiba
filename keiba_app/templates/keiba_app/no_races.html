@@ -1,0 +1,16 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="container-fluid">
+  <div class="center-block mt-4 mb-2">
+    <div class="text-center">
+      <h2>最新のレース情報はありません</h2>
+      <p>※更新日時: 毎週金曜日AM1:00頃</p>
+    </div>
+    <div class="text-center mt-4">
+      <p>過去のレース情報・予測結果を見てみますか？</p>
+      <a href="{{ url_for('index') }}" class="btn btn-primary">見る</a>
+    </div>
+  </div>
+</div>
+{% endblock %}

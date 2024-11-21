@@ -26,12 +26,18 @@
             <tr>
               <th>レースid</th>
               <th>レース名</th>
+              <th>予測精度</th>
             </tr>
             <tbody>
               {% for info in race_infomations %}
-              <tr>
+              <tr id="contents">
                 <td><a href="{{ url_for('show_new_race', race_id=info.race_id) }}">{{ info.race_id }}</a></td>
                 <td>{{ info.race_title }}</td>
+                {% if df['predict_flag'].all() %}
+                <td></td>
+                {% else %}
+                <td>不十分</td>
+                {% endif %}
               </tr>
               {% endfor %}
             </tbody>

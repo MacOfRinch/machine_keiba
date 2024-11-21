@@ -1,32 +1,24 @@
 {% extends "layout.html" %}
 
 {% block content %}
-<div class="center-block">
-  <h1 class="text-center">馬！かけトク！？</h1>
-</div>
 <div class="container-fluid">
   <div class="center-block mt-4 mb-2">
-    <div class="text-center">
-      <h2>ありゃっ！？</h2>
+    <div class="text-center sticky-top">
+      <h3>今週のかけトク！？レース</h3>
+      <p id="updated">{{ updated_at }}</p>
     </div>
+    {% for table in data_tables %}
     <div class="container">
       <div class="row">
         <div class="col-1"></div>
         <div class="col-10">
-          {{ table | safe }}
+          <p>かけトク度: {{ table.kaketoku }}</p>
+          {{ table.to_html(classes='table table-striped') | safe }}
         </div>
         <div class="col-1"></div>
       </div>
     </div>
-    <div class="container mt-2">
-      <div class="row">
-        <div class="col-2"></div>
-        <div class="col-8">
-          {{ return_table | safe }}
-        </div>
-        <div class="col-2"></div>
-      </div>
-    </div>
+    {% endfor %}
   </div>
 </div>
 {% endblock %}

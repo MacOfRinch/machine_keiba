@@ -4,9 +4,10 @@ import os
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 import pandas as pd
-from keiba_app import app, db, model
+from keiba_app import app, db
 from flask import render_template, redirect, url_for, flash, jsonify
 from flask import request, session
+from flask import g
 import time
 from datetime import datetime as dt
 from datetime import date as d
@@ -19,20 +20,36 @@ from keiba_app import NewRace
 from keiba_app import PredictDatum
 from keiba_app import OddsUpperLimit
 
+with app.app_context():
+  model = g.get('model')
+
 @app.route('/')
 def main_display():
   # 近レースの予想と今までの的中率・回収率、おすすめの賭け方を提示するページ
-  race_id = '202405040501'
-  predict = PredictDatum.predict(race_id)['data']
-  return_table = PredictDatum.predict(race_id)['return']
-  return render_template('keiba_app/main_display.html', table=predict.to_html(classes='table table-striped'), return_table=return_table.to_html(classes='table table-striped'))
+  scheduled_race_data = db.session.query(RaceCalenderModel).all()
+  future_race_ids = []
+  for scheduled_race in scheduled_race_data:
+    date = scheduled_race.race_date
+    if dt.strptime(date, '%Y%m%d') >= dt.now():
+      future_race_ids.append(scheduled_race.race_id)
+  race_predictions = []
+  return_tables = []
+  updated_at = f'最終更新: {dt.now().strftime("%m/%d %H:%M:%S")}'
+  if bool(future_race_ids):
+    race_predictions = [PredictDatum.predict(race_id)['data'] for race_id in future_race_ids]
+    return_tables = [PredictDatum.predict(race_id)['return'] for race_id in future_race_ids]
+    return render_template('keiba_app/main_display.html', data_tables=race_predictions, return_tables=return_tables, updated_at=updated_at)
+  else:
+    return render_template('keiba_app/no_races.html')
 
 @app.route('/races')
 def index():
-  race_data = db.session.query(RaceResultModel.race_id, RaceResultModel.race_date).distinct().order_by(RaceResultModel.race_date.desc()).all()
+  # 過去のレースのデータ一覧
+  race_data = db.session.query(RaceResultModel.race_id, RaceResultModel.race_date, RaceResultModel.predict_flag).distinct().order_by(RaceResultModel.race_date.desc()).all()
+  predict_result = db.session.query(PredictResultModel).all()
   return render_template('keiba_app/index.html', race_data=race_data)
 
-@app.route('/race/<int:race_id>')
+@app.route('/race/<string:race_id>')
 def show_race_detail(race_id):
   race_data = RaceResultModel.query.filter(RaceResultModel.race_id == race_id)
   return render_template('/keiba_app/show_race.html', race_data=race_data)
@@ -121,19 +138,23 @@ def new_race_id_index(race_date: str):
 
 @app.route('/new_races/show/<string:race_id>', methods=['GET'])
 def show_new_race(race_id: str):
+  # 現在のコードはページリクエスト時に都度スクレイピング∴レス遅い　本番ではレースのある日に10分ごとに定期実行した結果をjsでリアルタイム表示する
+  race_ids = [race_id_tupple[0] for race_id_tupple in db.session.query(RaceCalenderModel.race_id).all()]
+  if race_id not in race_ids:
+    return render_template('keiba_app/no_race.html', race_id=race_id)
   session.pop('message', None)
   new_race_datum = NewRace.scrape(race_id)
   race_info = RaceCalenderModel.query.filter(RaceCalenderModel.race_id == race_id).first()
   race_date = race_info.race_date
   feature = NewRace.analyze(race_date, new_race_datum[0])
   prediction = model.predict(feature).tolist()
-  predict_datum = new_race_datum[0]
-  predict_datum['スコア'] = prediction
+  predict_datum = new_race_datum['race_df']
+  predict_datum['競走力指数'] = [x * 100 / sum(prediction) for x in prediction]
   # 暫定　表示が少し変
-  col = [('枠', '枠'), ('馬番', '馬番'), ('馬名', '馬名'), ('騎手', '騎手'), ('オッズ', 'オッズ'), ('スコア', '')]
+  col = [('枠', '枠'), ('馬番', '馬番'), ('馬名', '馬名'), ('騎手', '騎手'), ('オッズ', 'オッズ'), ('競走力指数', '')]
   display_data = predict_datum[col]
-  temporary_return_table = new_race_datum[1]
-  df = new_race_datum[0]
+  temporary_return_table = new_race_datum['odds_df']
+  df = new_race_datum['race_df']
   if df['predict_flag'].all():
     session['message'] = '現時点での情報です。レースが近づくと変わる可能性があります。'
     flash(session['message'])
