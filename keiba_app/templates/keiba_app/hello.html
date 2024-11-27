@@ -5,8 +5,14 @@
 <div class="container-fluid">
   <div class="center-block mt-4 mb-2">
     <div class="text-center">
-      <h2>直近半年間のレース一覧</h2>
+      <h2>直近半年間のレース一覧...はないよ！</h2>
     </div>
+    <form action="{{ url_for('views.update_job') }}" method="POST">
+      <button type="submit" class="btn btn-primary">ジョブ更新すっぞ！</button>
+    </form>
+    <form action="{{ url_for('views.check_scheduled_jobs') }}" method="POST">
+      <button type="submit" class="btn btn-success">ジョブ確認じゃい！</button>
+    </form>
   </div>
 </div>
 {% endblock %}

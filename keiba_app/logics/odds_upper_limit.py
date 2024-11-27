@@ -1,4 +1,4 @@
-from keiba_app import app, db, model
+from keiba_app import db
 from ..models.horse import HorseModel
 from ..models.jockey import JockeyModel
 from ..models.race_result import RaceResultModel
@@ -16,6 +16,7 @@ from datetime import date
 class OddsUpperLimit:
   @staticmethod
   def calc_fukushou():
+    from main import app
     with app.app_context():
       past_1_month_datum = db.session.query(RaceResultModel.race_id).\
         filter(RaceResultModel.race_date >= dt.today() - relativedelta(months=1)).group_by(RaceResultModel.race_id).all()
@@ -72,6 +73,7 @@ class OddsUpperLimit:
   
   @staticmethod
   def calc_wide():
+    from main import app
     with app.app_context():
       past_1_month_datum = db.session.query(RaceResultModel.race_id).\
         filter(RaceResultModel.race_date >= dt.today() - relativedelta(months=1)).group_by(RaceResultModel.race_id).all()

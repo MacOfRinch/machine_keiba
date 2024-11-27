@@ -4,7 +4,6 @@ import sys
 import os
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from keiba_app import app
 from keiba_app import db
 from datetime import date as d
 from datetime import datetime as dt
@@ -13,15 +12,11 @@ from selenium import webdriver
 from bs4 import BeautifulSoup
 import time
 import re
-from models.race_calender import RaceCalenderModel
-
-with app.app_context():
-  race_date_datum = db.session.query(RaceCalenderModel).all()
-  dates_list = [date.race_date for date in race_date_datum]
+from .models.race_calender import RaceCalenderModel
 
 def add_new_data():
   day = d.today()
-  while day < d.today() + relativedelta(days=4):
+  while day <= d.today() + relativedelta(days=1):
     half_year_later = day + relativedelta(months=6)
     options = webdriver.ChromeOptions()
     options.add_argument('--headless')
@@ -44,7 +39,10 @@ def add_new_data():
         title = link.select('span.ItemTitle')[0].text
         race_id = ''.join(re.findall(r'\d+', link['href']))
         infomations.append({'title': title, 'race_id': race_id})
+      from main import app
       with app.app_context():
+        race_date_datum = db.session.query(RaceCalenderModel).all()
+        dates_list = [date.race_date for date in race_date_datum]
         for infomation in infomations:
           race_dates = RaceCalenderModel(
             race_date=day.strftime('%Y%m%d'),
@@ -59,7 +57,9 @@ def add_new_data():
     time.sleep(5)
 
 def delete_old_data():
+  from main import app
   with app.app_context():
+    race_date_datum = db.session.query(RaceCalenderModel).all()
     for date_data in race_date_datum:
       expires_date = date_data.expires_at
       if expires_date < d.today():

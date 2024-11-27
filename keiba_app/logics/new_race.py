@@ -1,7 +1,7 @@
 # 新しいレース情報が出たらスクレイピングし、分析に用いる準備をする
 # 実際に分析を行い表示するのはviews.py
 
-from keiba_app import app, db
+from keiba_app import db
 from ..models.horse import HorseModel
 from ..models.jockey import JockeyModel
 from ..models.race_calender import RaceCalenderModel
@@ -40,6 +40,7 @@ class NewRace:
       infomations.append({'title': title, 'race_id': race_id})
     # 取得した情報をrace_calenderテーブルに保存
     dates_list = db.session.query(RaceCalenderModel.race_date).all()
+    from main import app
     with app.app_context():
       for infomation in infomations:
         new_race_data = RaceCalenderModel(
@@ -133,6 +134,7 @@ class NewRace:
     # そのレースのhorse_id, jockey_idがDB内にあるのはscrapeメソッドで担保済み
     horse_id_list = df['horse_id'].to_list()
     jockey_id_list = df['jockey_id'].to_list()
+    from main import app
     with app.app_context():
       Session = sessionmaker(bind=db.engine)
       session = Session()

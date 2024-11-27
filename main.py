@@ -8,8 +8,12 @@
 # db = SQLAlchemy(app)
 # migrate = Migrate(app, db)
 
-from keiba_app import app, load_model
+from keiba_app import create_app, load_model
+from keiba_app.scheduler_json import load_jobs_from_file
+
+app = create_app()
 
 if __name__ == '__main__':
-  load_model()
+  model = load_model()
+  load_jobs_from_file()
   app.run()
