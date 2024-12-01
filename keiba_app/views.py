@@ -228,8 +228,8 @@ def update_job():
     id='get_days_of_race_held',
     func=get_days_of_race_held,
     trigger='cron',
-    # hour='1',
-    minute='*/3',
+    hour='1',
+    minute='0',
     second='0'
   )
   response['success'] = True

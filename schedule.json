@@ -1,1 +1,10 @@
-[{"id": "get_days_of_race_held", "func": "keiba_app.scheduled_jobs:get_days_of_race_held", "trigger": "cron", "args": [], "kwargs": {}, "trigger_args": "hour='1', minute='0', second='0'"}]
+[
+    {
+        "id": "get_days_of_race_held",
+        "func": "keiba_app.scheduled_jobs:get_days_of_race_held",
+        "trigger": "cron",
+        "args": [],
+        "kwargs": {},
+        "trigger_args": "hour='1', minute='0', second='0'"
+    }
+]

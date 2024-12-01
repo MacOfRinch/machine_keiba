@@ -11,6 +11,7 @@ import importlib
 scheduler = APScheduler()
 SCHEDULE_FILE = 'schedule.json'
 
+# arg = scheduler 明示的にschedulerを渡す
 def save_jobs_to_file(arg):
   jobs = []
   for job in arg.get_jobs():
@@ -27,18 +28,15 @@ def save_jobs_to_file(arg):
       'trigger_args': match.group(1) if match else str_trigger
     })
   with open(SCHEDULE_FILE, 'w') as f:
-    json.dump(jobs, f, default=str)
+    json.dump(jobs, f, default=str, indent=4, ensure_ascii=False)
 
 def load_jobs_from_file():
-  from .scheduled_jobs import get_days_of_race_held
-
   print(' * Loading schedule file ...')
   if not os.path.exists(SCHEDULE_FILE):
     print(' * Schedule file not found.')
     return
   
   with open(SCHEDULE_FILE, 'r') as f:
-    from keiba_app.scheduled_jobs import get_days_of_race_held
     jobs_data = json.load(f)
   if not bool(jobs_data):
     print(' * Schedule file is empty. Check if it was actually saved.')

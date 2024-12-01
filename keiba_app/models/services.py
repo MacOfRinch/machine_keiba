@@ -15,3 +15,15 @@ def get_race_dates():
     scheduled_races = db.session.query(RaceCalenderModel).all()
   future_dates = [race.race_date for race in scheduled_races if dt.strptime(race.race_date, '%Y%m%d').date() >= dt.today().date()]
   return future_dates
+
+def get_race_ids(date):
+  from main import app
+  with app.app_context():
+    race_ids = [race_id_tupple[0] for race_id_tupple in db.session.query(RaceCalenderModel.race_id).filter(RaceCalenderModel.race_date == date).all()]
+  return race_ids
+
+def get_start_time(race_id):
+  from main import app
+  with app.app_context():
+    start_at = db.session.query(RaceCalenderModel.start_at).filter(RaceCalenderModel.race_id == race_id).first()
+  return start_at[0]
