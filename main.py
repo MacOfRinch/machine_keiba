@@ -8,7 +8,7 @@
 # db = SQLAlchemy(app)
 # migrate = Migrate(app, db)
 
-from keiba_app import create_app, load_model
+from keiba_app import create_app, load_model, socketio
 from keiba_app.scheduler_json import load_jobs_from_file
 
 app = create_app()
@@ -16,4 +16,4 @@ app = create_app()
 if __name__ == '__main__':
   model = load_model()
   load_jobs_from_file()
-  app.run()
+  socketio.run(app, debug=False, port=8080)

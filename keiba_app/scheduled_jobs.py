@@ -17,13 +17,15 @@ from keiba_app.models.services import *
 from keiba_app.scheduler_json import save_jobs_to_file, scheduler
 
 def default_job():
-  url = os.getenv('URL_HOST') + '/schedule/update_job'
-  print(f'定期実行ジョブが{dt.now()}にリセットされました。')
-  requests.post(url)
+    url = os.getenv('URL_HOST') + '/schedule/update_job'
+    print(f'定期実行ジョブが{dt.now()}にリセットされました。')
+    requests.post(url)
 
-def test(text):
-  print(text)
-  print(f'ジョブ無事に実行されてるね。今の時間は{dt.now()}だよ。')
+def test():
+    print(f'ジョブ無事に実行されてるね。今の時間は{dt.now()}だよ。')
+    data = {'message': 'こんちわ！', 'time': dt.strftime(dt.now(), '%H:%M:%S')}
+    from keiba_app.web_sockets import emit_data_to_client
+    emit_data_to_client(data)
 
 # 毎日AM1:00実行
 def get_days_of_race_held():
@@ -101,7 +103,6 @@ def get_race_data():
         soup = BeautifulSoup(html, 'html.parser')
         sub_text = soup.find('div', attrs={'class': 'RaceData01'}).text
         start_at_str = ''.join(re.findall(r'\d{1,2}:\d{1,2}', sub_text)[0])
-        print(start_at_str)
         start_at = dt.strptime(start_at_str, '%H:%M').time()
         with app.app_context():
             temporary_race_data = db.session.query(TemporaryRaceData).filter(TemporaryRaceData.race_id == race_id).first()
@@ -110,6 +111,8 @@ def get_race_data():
         print(start_at)
         print(last_updated)
         time.sleep(3)
+    from keiba_app import socketio
+    socketio.emit()
         # except Exception as e:
         #     print(e)
         #     time.sleep(3)

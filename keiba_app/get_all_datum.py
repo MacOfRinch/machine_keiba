@@ -26,12 +26,12 @@ from models.race_calender import RaceCalenderModel
 from models.predict_result import PredictResultModel
 
 # あとで直す
-date = dt.strptime('2024-11-23', '%Y-%m-%d').date()
+date = dt.strptime('2024-11-30', '%Y-%m-%d').date()
 this_year = int(dt.today().year)
 half_year_later = date + relativedelta(months=6)
 # ここも直す
 with app.app_context():
-  race_infomations = RaceCalenderModel.query.filter(RaceCalenderModel.race_date == '20241123').all()
+  race_infomations = RaceCalenderModel.query.filter(RaceCalenderModel.race_date == '20241130').all()
 race_ids = [race_infomation.race_id for race_infomation in race_infomations]
 
 all_horse_ids = []
@@ -46,8 +46,8 @@ for race_id in race_ids:
     response.encoding = "EUC-JP"
 
     soup = BeautifulSoup(response.text, "html.parser")
-    tables = soup.find_all('table')
-    data_table = str(tables[0])
+    target_table = soup.find('table', attrs={'summary': 'レース結果'})
+    data_table = str(target_table)
     df = pd.read_html(StringIO(data_table))[0]
     # 半角スペースがあったら除去
     df = df.rename(columns=lambda x: x.replace(' ', ''))

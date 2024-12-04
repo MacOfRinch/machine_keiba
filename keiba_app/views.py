@@ -6,7 +6,7 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 import pandas as pd
 from keiba_app import db
 from flask import render_template, redirect, url_for, flash, jsonify, Blueprint
-from flask import request, session, current_app
+from flask import request, session
 from flask import g
 import time
 from datetime import datetime as dt
@@ -42,13 +42,13 @@ def main_display():
     return_tables = [PredictDatum.predict(race_id)['return'] for race_id in future_race_ids]
     return render_template('keiba_app/main_display.html', data_tables=race_predictions, return_tables=return_tables, updated_at=updated_at)
   else:
-    return render_template('keiba_app/no_races.html')
+    return render_template('keiba_app/no_races.html', now=dt.now().time())
 
 @bp.route('/races')
 def index():
   # 過去のレースのデータ一覧
   race_data = db.session.query(RaceResultModel.race_id, RaceResultModel.race_date, RaceResultModel.predict_flag).distinct().order_by(RaceResultModel.race_date.desc()).all()
-  predict_result = db.session.query(PredictResultModel).all()
+  predict_results = db.session.query(PredictResultModel).all()
   return render_template('keiba_app/index.html', race_data=race_data)
 
 @bp.route('/race/<string:race_id>')
@@ -70,6 +70,7 @@ def race_date_index():
   return render_template('/keiba_app/race_dates_index.html', race_dates=display_race_dates)
 
 # 基本的に手動では実行しない、未取得の過去のレースデータを取得するリクエスト
+# 月曜10:00にはまだ更新なし
 @bp.route('/race/get_datum/<string:race_date>', methods=['POST'])
 def get_new_datum(race_date):
   if request.method == 'POST':

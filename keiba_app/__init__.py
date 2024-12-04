@@ -2,6 +2,7 @@ from flask import Flask, g
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from flask_apscheduler import APScheduler
+from flask_socketio import SocketIO
 from pytz import timezone
 import joblib
 import os
@@ -9,6 +10,7 @@ import os
 db = SQLAlchemy()
 migrate = Migrate()
 scheduler = APScheduler()
+socketio = SocketIO()
 
 def create_app():
   app = Flask(__name__)
@@ -18,6 +20,8 @@ def create_app():
 
   db.init_app(app)
   migrate.init_app(app, db)
+  # 本番ではcorsきっちりやる
+  socketio.init_app(app, cors_allowed_origins="*")
   if not scheduler.running:
     print("Scheduler is starting...")
     scheduler.init_app(app)

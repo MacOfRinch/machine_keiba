@@ -24,8 +24,8 @@ class UpdateDatum:
     response.encoding = "EUC-JP"
 
     soup = BeautifulSoup(response.text, "html.parser")
-    tables = soup.find_all('table')
-    data_table = str(tables[0])
+    target_table = soup.find('table', attrs={'summary': 'レース結果'})
+    data_table = str(target_table)
     df = pd.read_html(StringIO(data_table))[0]
     # 半角スペースがあったら除去
     df = df.rename(columns=lambda x: x.replace(' ', ''))
