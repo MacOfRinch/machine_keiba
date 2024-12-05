@@ -13,6 +13,6 @@
         "trigger": "cron",
         "args": [],
         "kwargs": {},
-        "trigger_args": "second='*/10'"
+        "trigger_args": "second='*/30'"
     }
 ]

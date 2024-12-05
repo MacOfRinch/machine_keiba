@@ -1,3 +1,6 @@
+import eventlet
+eventlet.monkey_patch()
+
 from flask import Flask, g
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
@@ -21,7 +24,7 @@ def create_app():
   db.init_app(app)
   migrate.init_app(app, db)
   # 本番ではcorsきっちりやる
-  socketio.init_app(app, cors_allowed_origins="*")
+  socketio.init_app(app, cors_allowed_origins="*", async_mode="eventlet")
   if not scheduler.running:
     print("Scheduler is starting...")
     scheduler.init_app(app)
@@ -41,7 +44,7 @@ def create_app():
       g.model = load_model()
 
   with app.app_context():
-    from keiba_app import views
+    from keiba_app import views, web_sockets
     app.register_blueprint(views.bp)
   return app
 

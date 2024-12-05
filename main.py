@@ -10,10 +10,13 @@
 
 from keiba_app import create_app, load_model, socketio
 from keiba_app.scheduler_json import load_jobs_from_file
+import time
 
 app = create_app()
 
 if __name__ == '__main__':
   model = load_model()
   load_jobs_from_file()
+  print("サーバーを起動中...")
+  time.sleep(2)
   socketio.run(app, debug=False, port=8080)

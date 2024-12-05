@@ -12,6 +12,7 @@ import time
 from datetime import datetime as dt
 from datetime import date as d
 from dateutil.relativedelta import relativedelta
+import random
 
 from keiba_app.models.race_result import RaceResultModel
 from keiba_app.models.race_calender import RaceCalenderModel
@@ -42,7 +43,10 @@ def main_display():
     return_tables = [PredictDatum.predict(race_id)['return'] for race_id in future_race_ids]
     return render_template('keiba_app/main_display.html', data_tables=race_predictions, return_tables=return_tables, updated_at=updated_at)
   else:
-    return render_template('keiba_app/no_races.html', now=dt.now().time())
+    races = db.session.query(RaceResultModel).filter(RaceResultModel.race_date == '20241201').all()
+    selected_race = random.choice(races)
+    prediction = PredictDatum.predict(selected_race.race_id)['data']
+    return render_template('keiba_app/no_races.html', table=prediction.to_html(classes='table table-striped'))
 
 @bp.route('/races')
 def index():

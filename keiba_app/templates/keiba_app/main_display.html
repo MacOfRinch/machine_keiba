@@ -5,7 +5,8 @@
   <div class="center-block mt-4 mb-2">
     <div class="text-center sticky-top">
       <h3>今週のかけトク！？レース</h3>
-      <p id="last_updated">{{ updated_at }}</p>
+      <p id="last_updated"></p>
+      <p id="connect-success"></p>
     </div>
     {% for table in data_tables %}
     <div class="container" id="{{ table[race_id][0] }}">

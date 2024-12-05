@@ -1,8 +1,8 @@
 # 定期実行ジョブの中身
 
-import sys
-import os
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+# import sys
+# import os
+# sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 import requests
 from datetime import datetime as dt
@@ -16,16 +16,9 @@ from keiba_app.models.temporary_race_data import TemporaryRaceData
 from keiba_app.models.services import *
 from keiba_app.scheduler_json import save_jobs_to_file, scheduler
 
-def default_job():
-    url = os.getenv('URL_HOST') + '/schedule/update_job'
-    print(f'定期実行ジョブが{dt.now()}にリセットされました。')
-    requests.post(url)
-
 def test():
-    print(f'ジョブ無事に実行されてるね。今の時間は{dt.now()}だよ。')
-    data = {'message': 'こんちわ！', 'time': dt.strftime(dt.now(), '%H:%M:%S')}
-    from keiba_app.web_sockets import emit_data_to_client
-    emit_data_to_client(data)
+    from keiba_app.web_sockets import emit_test_data
+    emit_test_data()
 
 # 毎日AM1:00実行
 def get_days_of_race_held():
@@ -111,8 +104,7 @@ def get_race_data():
         print(start_at)
         print(last_updated)
         time.sleep(3)
-    from keiba_app import socketio
-    socketio.emit()
+    
         # except Exception as e:
         #     print(e)
         #     time.sleep(3)
