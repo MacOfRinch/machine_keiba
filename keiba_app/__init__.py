@@ -23,21 +23,11 @@ def create_app():
 
   db.init_app(app)
   migrate.init_app(app, db)
-  # 本番ではcorsきっちりやる
-  socketio.init_app(app, cors_allowed_origins="*", async_mode="eventlet")
   if not scheduler.running:
     print("Scheduler is starting...")
     scheduler.init_app(app)
     scheduler.start()
-  # 初期登録スケジューラ
-  # with app.app_context():
-  #   from keiba_app.scheduled_jobs import default_job
-  #   scheduler.add_job(
-  #   id='default_job',
-  #   func=default_job,
-  #   trigger='cron',
-  #   minute='*/2'
-  # )
+
   if model == None:
     @app.before_request
     def setup_model():

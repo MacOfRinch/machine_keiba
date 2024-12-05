@@ -13,10 +13,14 @@ from keiba_app.scheduler_json import load_jobs_from_file
 import time
 
 app = create_app()
+def init_socket():
+  # 本番ではcorsきっちりやる
+  socketio.init_app(app, cors_allowed_origins="*", async_mode="eventlet")
 
 if __name__ == '__main__':
   model = load_model()
   load_jobs_from_file()
+  init_socket()
   print("サーバーを起動中...")
-  time.sleep(2)
+  time.sleep(3)
   socketio.run(app, debug=False, port=8080)

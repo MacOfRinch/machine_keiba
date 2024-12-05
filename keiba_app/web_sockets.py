@@ -5,23 +5,42 @@
 
 from keiba_app import socketio
 from datetime import datetime as dt
+from flask import request
 
-@socketio.on('connect')
+latest_data = {'message': '初期データ', 'time': dt.strftime(dt.now(), '%H:%M:%S')}
+connected_clients = set()
+
+@socketio.on('connect', namespace='/')
 def handle_connect():
-  print('コネクションが確立されました！')
+  client_id = request.sid
+  connected_clients.add(client_id)
+  print(f'コネクションが確立されました！クライアントID: {client_id}')
+  socketio.emit('response', {'message': 'connection成功'}, to=client_id)
   socketio.start_background_task(target=emit_test_data)
 
-@socketio.on('receive')
+@socketio.on('request_latest_data', namespace='/')
+def emit_latest_data():
+  global latest_data
+  if latest_data:
+    socketio.emit('test_event', latest_data, namespace='/')
+
+@socketio.on('receive', namespace='/')
 def handle_my_custom_event(data):
   print('received json: ' + str(data))
 
-@socketio.on('disconnect')
+@socketio.on('disconnect', namespace='/')
 def handle_disconnect():
-  print('コネクションが解除されました')
+  client_id = request.sid
+  connected_clients.discard(client_id)
+  print(f'コネクションが解除されました クライアントID: {request.sid}')
 
 def emit_test_data():
-  print(f'ジョブ無事に実行されてるね。今の時間は{dt.now()}だよ。')
-  data = {'message': 'こんちわ！', 'time': dt.strftime(dt.now(), '%H:%M:%S')}
-  print(data)
-  socketio.emit('test_event', data)
+  print("クライアントが最新データを要求しました")
+  global latest_data
+  latest_data = {'message': 'こんちわ！', 'time': dt.strftime(dt.now(), '%H:%M:%S')}
+  if latest_data:
+    socketio.emit('test_event', latest_data, namespace='/')
+    print(f'送信成功: {latest_data}')
+  else:
+    print('エラー: 初期データが存在しません')
   print('イベントが発火しました')
