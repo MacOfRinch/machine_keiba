@@ -11,14 +11,24 @@ import re
 from selenium import webdriver
 import time
 from sqlalchemy import text
+import random
+import pandas as pd
 
 from keiba_app.models.temporary_race_data import TemporaryRaceData
 from keiba_app.models.services import *
 from keiba_app.scheduler_json import save_jobs_to_file, scheduler
 
 def test():
-    from keiba_app.web_sockets import emit_test_data
-    emit_test_data()
+    from keiba_app import db
+    from main import app
+    with app.app_context():
+        races = db.session.query(RaceResultModel).filter(RaceResultModel.race_date == '20241201').all()
+        random_race = random.choice(races)
+        from keiba_app.web_sockets import emit_random_data
+        from keiba_app.logics.predict_datum import PredictDatum
+        race_data = PredictDatum.predict(random_race.race_id)['data'].to_dict(orient='records')
+    emit_random_data(race_data)
+    # return random_race
 
 # 毎日AM1:00実行
 def get_days_of_race_held():

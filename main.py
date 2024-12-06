@@ -21,6 +21,4 @@ if __name__ == '__main__':
   model = load_model()
   load_jobs_from_file()
   init_socket()
-  print("サーバーを起動中...")
-  time.sleep(3)
   socketio.run(app, debug=False, port=8080)

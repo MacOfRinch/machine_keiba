@@ -9,12 +9,17 @@ const socket = io.connect("http://" + document.domain + ":" + location.port + '/
 document.addEventListener("DOMContentLoaded", () => {
   console.log('DOMが読み込まれました。ソケット接続を開始します。');
   
-  socket.on('connect', () => {
+  socket.on('connect', (latest_data) => {
     console.log('サーバーに接続できました！');
     const connect = document.getElementById('connect-success');
     connect.textContent = '画面は正常に更新されます';
     socket.emit('receive', {data: 'connected!'});
-    socket.emit('request_latest_data');
+    const lastTime = document.getElementById('last_updated');
+    if (lastTime && lastTime.textContent.trim() === '') {
+      socket.emit('request_latest_data');
+    };
+    lastTime.textContent = `最終更新: ${latest_data.time}`;
+    socket.emit('request_table_data');
   });
 
   socket.on('response', (data) =>{
@@ -33,20 +38,39 @@ document.addEventListener("DOMContentLoaded", () => {
     connect.textContent = '画面が更新されない状態になっています。再読み込みしてください。';
   });
 
-  socket.on('test_event', (data) => {
-    console.log('データを受信しました:', data);
-    if (data) {
-        console.log(`受信したデータ: メッセージ=${data.message}, 時間=${data.time}`);
-    } else {
-        console.error('データがnullまたはundefinedです');
-    }
+  socket.on('update_table', (data) => {
+    console.log('新しいテーブルデータを受信しました:');
     const nowTime = document.getElementById('last_updated');
-    if (nowTime) {
-        nowTime.textContent = `最終更新: ${data.time}`;
-    } else {
-        console.log('last_updated要素が見つかりません');
+    nowTime.textContent = `最終更新: ${data.time}`;
+    updateTable(data.data);
+});
+
+  function updateTable(data) {
+    const table = document.getElementById('race_table');
+    const headerRow = table.querySelector('thead tr');
+    const tbody = table.querySelector('tbody');
+
+    // ヘッダーを生成
+    if (!headerRow.hasChildNodes()) {
+        Object.keys(data[0]).forEach(key => {
+            const th = document.createElement('th');
+            th.textContent = key;
+            headerRow.appendChild(th);
+        });
     }
-  });
+
+    // ボディをクリアして再生成
+    tbody.innerHTML = '';
+    data.forEach(row => {
+        const tr = document.createElement('tr');
+        Object.values(row).forEach(value => {
+            const td = document.createElement('td');
+            td.textContent = value;
+            tr.appendChild(td);
+        });
+        tbody.appendChild(tr);
+    });
+  }
 });
 
 window.addEventListener("beforeunload", () => {
