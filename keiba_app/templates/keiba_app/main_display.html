@@ -1,6 +1,7 @@
 {% extends "layout.html" %}
 
 {% block content %}
+<script type="text/javascript" charset="utf-8" src="{{ url_for('static', filename='javascript/websocket.js') }}"></script>
 <div class="container-fluid">
   <div class="center-block mt-4 mb-2">
     <div class="text-center sticky-top">
@@ -8,19 +9,66 @@
       <p id="last_updated"></p>
       <p id="connect-success"></p>
     </div>
-    {% for table in data_tables %}
+    <!-- {% for table in data_tables %} -->
     <div class="container" id="{{ table[race_id][0] }}">
       <div class="row">
         <div class="col-1"></div>
         <div class="col-10">
-          <p>かけトク度: {{ table.kaketoku }}</p>
-          {{ table.to_html(classes='table table-striped') | safe }}
+          <!-- <p>かけトク度: {{ table.kaketoku }}</p> -->
+          <!-- {{ table.to_html(classes='table table-striped') | safe }} -->
+          <table class="table table-striped" id="race_0">
+            <thead>
+              <tr></tr>
+            </thead>
+            <tbody>
+              
+            </tbody>
+          </table>
+          <table class="table table-striped" id="odds_0">
+            <thead>
+              <tr></tr>
+            </thead>
+            <tbody>
+              
+            </tbody>
+          </table>
+          <table class="table table-striped" id="race_1">
+            <thead>
+              <tr></tr>
+            </thead>
+            <tbody>
+              
+            </tbody>
+          </table>
+          <table class="table table-striped" id="odds_1">
+            <thead>
+              <tr></tr>
+            </thead>
+            <tbody>
+              
+            </tbody>
+          </table>
+          <table class="table table-striped" id="race_2">
+            <thead>
+              <tr></tr>
+            </thead>
+            <tbody>
+              
+            </tbody>
+          </table>
+          <table class="table table-striped" id="odds_2">
+            <thead>
+              <tr></tr>
+            </thead>
+            <tbody>
+              
+            </tbody>
+          </table>
         </div>
         <div class="col-1"></div>
       </div>
     </div>
-    {% endfor %}
+    <!-- {% endfor %} -->
   </div>
 </div>
-<script src="../../static/javascript/websocket.js"></script>
 {% endblock %}

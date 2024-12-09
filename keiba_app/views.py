@@ -162,8 +162,8 @@ def show_new_race(race_id: str):
   new_race_datum = NewRace.scrape(race_id)
   race_info = RaceCalenderModel.query.filter(RaceCalenderModel.race_id == race_id).first()
   race_date = race_info.race_date
-  feature = NewRace.analyze(race_date, new_race_datum[0])
-  from main import model
+  feature = NewRace.analyze(race_date, new_race_datum['race_df'])
+  from keiba_app import model
   prediction = model.predict(feature).tolist()
   predict_datum = new_race_datum['race_df']
   predict_datum['競走力指数'] = [x * 100 / sum(prediction) for x in prediction]
@@ -202,7 +202,7 @@ def predict(race_id: str):
     if request.get_json().get('race_id'):
       race_data = NewRace.scrape(race_id)
       feature = NewRace.analyze(race_data)
-      from main import model
+      from keiba_app import model
       response['prediction'] = model.predict(feature).to_list()
       response['success'] = True
   return jsonify(response)

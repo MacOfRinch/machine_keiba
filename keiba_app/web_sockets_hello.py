@@ -1,37 +1,33 @@
-# import sys
-# import os
-
-# sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-
 from keiba_app import socketio
 from datetime import datetime as dt
 from flask import request
+import json
 
 latest_data = {'message': '初期データ', 'time': dt.strftime(dt.now(), '%H:%M:%S')}
 # デバッグ用
 connected_clients = set()
 
-@socketio.on('connect', namespace='/')
-def handle_connect(latest_data):
+@socketio.on('connect', namespace='/hello')
+def handle_connect():
   client_id = request.sid
   connected_clients.add(client_id)
   print(f'コネクションが確立されました! クライアントID: {client_id}')
-  if latest_data:
-    socketio.emit('random_event', latest_data, namespace='/')
+
+  socketio.emit('random_event', latest_data, to=client_id)
   socketio.emit('response', {'message': 'connection成功'}, to=client_id)
   # socketio.start_background_task(target=emit_test_data)
 
-@socketio.on('request_latest_data', namespace='/')
+@socketio.on('request_latest_data', namespace='/hello')
 def emit_latest_data():
   global latest_data
   if latest_data:
-    socketio.emit('connect', latest_data, namespace='/')
+    socketio.emit('connect', latest_data, namespace='/hello')
 
-@socketio.on('receive', namespace='/')
+@socketio.on('receive', namespace='/hello')
 def handle_my_custom_event(data):
   print('received json: ' + str(data))
 
-@socketio.on('disconnect', namespace='/')
+@socketio.on('disconnect', namespace='/hello')
 def handle_disconnect():
   client_id = request.sid
   connected_clients.discard(client_id)
@@ -43,7 +39,7 @@ def emit_test_data():
   global latest_data
   latest_data = {'message': 'こんちわ！', 'time': dt.strftime(dt.now(), '%H:%M:%S')}
   if latest_data:
-    socketio.emit('test_event', latest_data, namespace='/')
+    socketio.emit('test_event', latest_data, namespace='/hello')
     print(f'送信成功: {latest_data}')
   else:
     print('エラー: 初期データが存在しません')
@@ -53,7 +49,7 @@ def emit_random_data(race_data):
   global latest_data
   latest_data = {'message': 'こんちわ！', 'time': dt.strftime(dt.now(), '%H:%M:%S')}
   now_time = latest_data['time'] or dt.strftime(dt.now(), '%H:%M:%S')
-  socketio.emit('update_table', {'data': race_data, 'time': now_time})
+  socketio.emit('update_table', {'data': race_data, 'time': now_time}, namespace='/hello')
 
 def emit_new_race_data(datum):
   global latest_data
@@ -66,5 +62,21 @@ def emit_new_race_data(datum):
       'race_0': datum[0]['race_data'], 'odds_0': datum[0]['odds_data'],
       'race_1': datum[1]['race_data'], 'odds_1': datum[1]['odds_data'],
       'race_2': datum[2]['race_data'], 'odds_2': datum[2]['odds_data']
-    }
+    }, namespace='/hello'
+  )
+
+def emit_main_test_data(datum):
+  global latest_data
+  latest_data = {'message': 'こんちわ！', 'time': dt.strftime(dt.now(), '%H:%M:%S')}
+  now_time = latest_data['time'] or dt.strftime(dt.now(), '%H:%M:%S')
+  print(datum)
+  print('--------------------------------------')
+  print(datum[0]['race_data'])
+  socketio.emit(
+    'update_main_tables',
+    {'time': now_time, 'message': 'うまくいくかなぁ',
+      'race_0': json.dumps(datum[0]['race_data']), 'odds_0': json.dumps(datum[0]['odds_data']),
+      'race_1': json.dumps(datum[1]['race_data']), 'odds_1': json.dumps(datum[1]['odds_data']),
+      'race_2': json.dumps(datum[2]['race_data']), 'odds_2': json.dumps(datum[2]['odds_data'])
+    }, namespace='/hello'
   )

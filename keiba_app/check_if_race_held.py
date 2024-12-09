@@ -12,7 +12,7 @@ from selenium import webdriver
 from bs4 import BeautifulSoup
 import time
 import re
-from .models.race_calender import RaceCalenderModel
+from models.race_calender import RaceCalenderModel
 
 def add_new_data():
   day = d.today()

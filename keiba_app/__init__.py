@@ -18,7 +18,7 @@ socketio = SocketIO()
 def create_app():
   app = Flask(__name__)
   app.config.from_object('keiba_app.config')
-  model = None
+  # model = None
   app.secret_key = os.getenv('SECRET_KEY')
 
   db.init_app(app)
@@ -28,15 +28,17 @@ def create_app():
     scheduler.init_app(app)
     scheduler.start()
 
-  if model == None:
-    @app.before_request
-    def setup_model():
-      g.model = load_model()
+  # if model == None:
+  #   @app.before_request
+  #   def setup_model():
+  #     g.model = load_model()
 
   with app.app_context():
-    from keiba_app import views, web_sockets
+    from keiba_app import views, web_sockets, web_sockets_hello
     app.register_blueprint(views.bp)
   return app
+
+model = None
 
 def load_model():
   global model

@@ -10,7 +10,6 @@
 
 from keiba_app import create_app, load_model, socketio
 from keiba_app.scheduler_json import load_jobs_from_file
-import time
 
 app = create_app()
 def init_socket():
@@ -18,7 +17,7 @@ def init_socket():
   socketio.init_app(app, cors_allowed_origins="*", async_mode="eventlet")
 
 if __name__ == '__main__':
-  model = load_model()
+  load_model()
   load_jobs_from_file()
   init_socket()
   socketio.run(app, debug=False, port=8080)

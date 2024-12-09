@@ -53,6 +53,7 @@ class NewRace:
           db.session.add(new_race_data)
       db.session.commit()
 
+# 「印」カラムを消す
   @staticmethod
   def scrape(new_race_id: str) -> dict:
     race_url = 'https://race.netkeiba.com/race/shutuba.html?race_id=' + new_race_id
@@ -83,8 +84,7 @@ class NewRace:
     str_race_table = str(shutuba_table)
     race_df = pd.read_html(StringIO(str_race_table))[0]
     race_df = race_df.rename(columns=lambda x: x.replace(' ', ''))
-    # 確認用 後で消すよ
-    print(race_df)
+    race_df.columns = ['_'.join(col).strip() if isinstance(col, tuple) else col for col in race_df.columns]
     horse_id_list = []
     jockey_id_list = []
     horse_link_list = race_soup.find('table', attrs={'class': 'Shutuba_Table'}).find_all('a', attrs={'href': re.compile(r'^https://db.netkeiba.com/horse/\d+')})
@@ -114,10 +114,11 @@ class NewRace:
     # 現時点では単勝・複勝のみ
     odds_table = odds_soup.find('table', attrs={'class': 'RaceOdds_HorseList_Table', 'id': 'Ninki'})
     str_odds_table = str(odds_table)
-    odds_df = pd.read_html(StringIO(str_odds_table))
+    # 確認用
+    print(pd.read_html(StringIO(str_odds_table)))
+    odds_df = pd.read_html(StringIO(str_odds_table))[0]
     odds_df = odds_df.rename(columns=lambda x: x.replace(' ', ''))
-    # 確認用 あとで消すよ
-    print(odds_df)
+    odds_df = odds_df.drop(columns=['印'])
     # except Exception as e:
     #   print(e)
     #   return

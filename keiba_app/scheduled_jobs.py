@@ -4,11 +4,7 @@
 # import os
 # sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-import requests
 from datetime import datetime as dt
-from bs4 import BeautifulSoup
-import re
-from selenium import webdriver
 import time
 from sqlalchemy import text
 import random
@@ -17,6 +13,7 @@ import pandas as pd
 from keiba_app.models.temporary_race_data import TemporaryRaceData
 from keiba_app.models.services import *
 from keiba_app.scheduler_json import save_jobs_to_file, scheduler
+from keiba_app.logics.new_race import NewRace
 
 def test():
     from keiba_app import db
@@ -29,6 +26,34 @@ def test():
         race_data = PredictDatum.predict(random_race.race_id)['data'].to_dict(orient='records')
     emit_random_data(race_data)
     # return random_race
+
+def main_test():
+    from keiba_app import db
+    from main import app
+    with app.app_context():
+        # 近3レースのid取得 コレホントにできる？要確認
+        race_ids = [race_id_tupple[0] for race_id_tupple in\
+            db.session.query(RaceCalenderModel.race_id).filter(RaceCalenderModel.race_date == '20241201').\
+            limit(3).all()]
+    print(race_ids)
+
+    emit_datum = []
+    from keiba_app import model
+    for race_id in race_ids:
+        with app.app_context():
+            race_datum = NewRace.scrape(race_id)
+            feature = NewRace.analyze('20241201', race_datum['race_df'])
+        prediction = model.predict(feature).tolist()
+        predict_datum = race_datum['race_df']
+        predict_datum['競走力指数'] = [x * 100 / sum(prediction) for x in prediction]
+        # col = [('枠', '枠'), ('馬番', '馬番'), ('馬名', '馬名'), ('騎手', '騎手'), ('オッズ', 'オッズ'), ('競走力指数', '')]
+        col = ['枠_枠', '馬番_馬番', '馬名_馬名', '騎手_騎手', 'オッズ_オッズ', '競走力指数']
+        display_data = predict_datum[col].to_dict(orient='records')
+        temporary_return_table = race_datum['odds_df'].to_dict(orient='records')
+        emit_datum.append({'race_data': display_data, 'odds_data': temporary_return_table})
+        time.sleep(3)
+    from keiba_app.web_sockets_hello import emit_main_test_data
+    emit_main_test_data(emit_datum)
 
 # 毎日AM1:00実行
 def get_days_of_race_held():
@@ -86,35 +111,31 @@ def get_days_of_race_held():
 # レースがある日に8:00~17:00の間5分ごとに実行
 def get_race_data():
     print('レースデータの取得を開始します')
-    options = webdriver.ChromeOptions()
-    options.add_argument('--headless')
-    options.add_argument('--disable-gpu')
-    options.add_argument('--hide-scrollbars')
-    options.add_argument('--no-sandbox')
-    driver = webdriver.Chrome(options=options)
     today = dt.today().strftime('%Y%m%d')
-    from keiba_app import db
+    from keiba_app import db, model
     from main import app
     with app.app_context():
-        race_ids = [race_id_tupple[0] for race_id_tupple in db.session.query(TemporaryRaceData.race_id).filter(TemporaryRaceData.race_date == today).all()]
+        # 近3レースのid取得 コレホントにできる？要確認
+        race_ids = [race_id_tupple[0] for race_id_tupple in\
+            db.session.query(TemporaryRaceData.race_id).filter(TemporaryRaceData.race_date == today).\
+            filter(dt.strptime(TemporaryRaceData.start_at, '%H:%M').time() >= dt.now().time()).\
+            order_by(dt.strptime(TemporaryRaceData.start_at, '%H:%M').time()).limit(3).all()]
+    print(race_ids)
+
+    emit_datum = []
     for race_id in race_ids:
-        url = 'https://race.netkeiba.com/race/shutuba.html?race_id=' + race_id
-        # try:
-        driver.get(url)
-        time.sleep(1)
-        html = driver.page_source
-        soup = BeautifulSoup(html, 'html.parser')
-        sub_text = soup.find('div', attrs={'class': 'RaceData01'}).text
-        start_at_str = ''.join(re.findall(r'\d{1,2}:\d{1,2}', sub_text)[0])
-        start_at = dt.strptime(start_at_str, '%H:%M').time()
-        with app.app_context():
-            temporary_race_data = db.session.query(TemporaryRaceData).filter(TemporaryRaceData.race_id == race_id).first()
-        scheduled_start_at = dt.strptime(temporary_race_data.start_at, '%H:%M').time()
-        last_updated = dt.now().time()
-        print(start_at)
-        print(last_updated)
+        race_datum = NewRace.scrape(race_id)
+        feature = NewRace.analyze(today, race_datum['race_df'])
+        prediction = model.predict(feature).tolist()
+        predict_datum = race_datum['race_df']
+        predict_datum['競走力指数'] = [x * 100 / sum(prediction) for x in prediction]
+        col = [('枠', '枠'), ('馬番', '馬番'), ('馬名', '馬名'), ('騎手', '騎手'), ('オッズ', 'オッズ'), ('競走力指数', '')]
+        display_data = predict_datum[col].to_dict(orient='records')
+        temporary_return_table = race_datum['odds_df'].to_dict(orient='records')
+        emit_datum.append({'race_data': display_data, 'odds_data': temporary_return_table})
         time.sleep(3)
-    
+    from keiba_app.web_sockets import emit_new_race_data
+    emit_new_race_data(emit_datum)
         # except Exception as e:
         #     print(e)
         #     time.sleep(3)

@@ -1,4 +1,4 @@
-const socket = io.connect("http://" + document.domain + ":" + location.port + '/', {
+const socket = io.connect("http://" + document.domain + ":" + location.port + '/hello', {
   transports: ["websocket"],
   reconnection: true,
   reconnectionAttempts: 5,
@@ -43,20 +43,23 @@ document.addEventListener("DOMContentLoaded", () => {
     const nowTime = document.getElementById('last_updated');
     nowTime.textContent = `最終更新: ${data.time}`;
     updateTable(data.data, 'race_table');
-});
+  });
 
   socket.on('update_main_tables', (data) => {
+    console.log('新しいデータを受信しました！')
+    const displayMassage = document.getElementById('message');
+    displayMassage.textContent = `テスト: ${data.message}`;
     const nowTime = document.getElementById('last_updated');
+    nowTime.textContent = `最終更新: ${data.time}`
     const tableIds = ['race_0', 'odds_0', 'race_1', 'odds_1', 'race_2', 'odds_2'];
-    const datum = [data.race_0, data.odds_0, data.race_1, data.odds_1, data.race_2, data.odds_2];
+    const datum = [JSON.parse(data.race_0), JSON.parse(data.odds_0), JSON.parse(data.race_1), JSON.parse(data.odds_1), JSON.parse(data.race_2), JSON.parse(data.odds_2)];
     nowTime.textContent = `最終更新: ${data.time}`;
     tableIds.forEach((tableId, index) =>{
-      updateTable(datum[index], tableId);
+      createTable(datum[index], tableId);
     });
   });
 
   function updateTable(data, tableId) {
-    // const table = document.getElementById('race_table');
     const table = document.getElementById(tableId)
     const headerRow = table.querySelector('thead tr');
     const tbody = table.querySelector('tbody');
@@ -81,6 +84,33 @@ document.addEventListener("DOMContentLoaded", () => {
         });
         tbody.appendChild(tr);
     });
+  };
+
+  function createTable(data, tableId) {
+    const table = document.getElementById(tableId);
+    const thead = table.querySelector('thead tr');
+    const tbody = table.querySelector('tbody');
+
+// ヘッダーの生成
+    if (data.length > 0) {
+      const headers = Object.keys(data[0]);
+      headers.forEach(header => {
+        const th = document.createElement('th');
+        th.textContent = header.replace(/_/g, ''); // "_"を削除して表示を簡潔に
+        thead.appendChild(th);
+      });
+    }
+
+// データ行の生成
+    data.forEach(row => {
+      const tr = document.createElement('tr');
+      Object.values(row).forEach(value => {
+        const td = document.createElement('td');
+        td.textContent = typeof value === 'number' ? value.toFixed(2) : value; // 数値は小数点2桁に
+        tr.appendChild(td);
+      });
+    tbody.appendChild(tr);
+    });
   }
 });
 
@@ -89,14 +119,3 @@ window.addEventListener("beforeunload", () => {
     socket.disconnect();
   }
 });
-
-// socket.on('server_event', (data) => {
-//   const raceData = document.getElementById(data.race_id);
-//   const nowTime = document.getElementById('last_updated');
-//   nowTime.textContent = `最終更新: ${data.time}`;
-// });
-
-// socket.on('test_job', (data) => {
-//   const testJob = document.getElementById('test_job');
-//   testJob.textContent = `テスト: ${data.time}`;
-// });
