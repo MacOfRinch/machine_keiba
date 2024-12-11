@@ -3,7 +3,7 @@ import sys
 import os
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from keiba_app import app
+from main import app
 from keiba_app import db
 from datetime import date as d
 from datetime import datetime as dt
@@ -18,6 +18,7 @@ import time
 from io import StringIO
 from tqdm import tqdm
 import random
+from sqlalchemy.orm.attributes import flag_modified
 from models.horse import HorseModel
 from models.jockey import JockeyModel
 from models.race_result import RaceResultModel
@@ -25,12 +26,12 @@ from models.race_calender import RaceCalenderModel
 from models.predict_result import PredictResultModel
 
 # あとで直す
-date = dt.strptime('2024-11-10', '%Y-%m-%d').date()
+date = dt.strptime('2024-11-30', '%Y-%m-%d').date()
 this_year = int(dt.today().year)
 half_year_later = date + relativedelta(months=6)
 # ここも直す
 with app.app_context():
-  race_infomations = RaceCalenderModel.query.filter(RaceCalenderModel.race_date == '20241103').all()
+  race_infomations = RaceCalenderModel.query.filter(RaceCalenderModel.race_date == '20241130').all()
 race_ids = [race_infomation.race_id for race_infomation in race_infomations]
 
 all_horse_ids = []
@@ -45,8 +46,8 @@ for race_id in race_ids:
     response.encoding = "EUC-JP"
 
     soup = BeautifulSoup(response.text, "html.parser")
-    tables = soup.find_all('table')
-    data_table = str(tables[0])
+    target_table = soup.find('table', attrs={'summary': 'レース結果'})
+    data_table = str(target_table)
     df = pd.read_html(StringIO(data_table))[0]
     # 半角スペースがあったら除去
     df = df.rename(columns=lambda x: x.replace(' ', ''))
@@ -83,14 +84,11 @@ for horse_id in unique_horse_ids:
     response.encoding = 'EUC-JP'
     html = response.text
     soup = BeautifulSoup(html, 'html.parser')
-    tables = soup.find_all('table')
-    str_table = str(tables[3])
+    target_table = soup.find('table', attrs={'class': 'db_h_race_results'})
+    str_table = str(target_table)
     df = pd.read_html(StringIO(str_table))[0]
     df = df.rename(columns=lambda x: x.replace(' ', ''))
-    if df.columns[0] == '受賞歴':
-      str_table = str(tables[4])
-      df = pd.read_html(StringIO(str_table))[0]
-      df = df.rename(columns=lambda x: x.replace(' ', ''))
+
     df.index = [horse_id] * len(df)
     df['日付'] = df['日付'].apply(lambda x: dt.strptime(x, '%Y/%m/%d'))
     df = df.loc[df['日付'] >= (dt.today() + relativedelta(months=-6))]
@@ -114,6 +112,7 @@ for horse_id in unique_horse_ids:
         order_ave_data = horse_info.order_ave_info
         order_ave_data[str(date)] = order_ave
         horse_info.order_ave_info = order_ave_data
+        flag_modified(horse_info, 'order_ave_info')
         horse_info.expires_at = date + relativedelta(months=6)
       elif horse_id not in horse_id_list:
         order_ave_data = {}
@@ -127,6 +126,8 @@ for horse_id in unique_horse_ids:
       else:
         print('何かがおかしい')
       db.session.commit()
+      # データ更新確認用
+      print(f'{horse_id}: {horse_info.order_ave_info}')
     time.sleep(3)
   except Exception as e:
     print(e)
@@ -142,8 +143,8 @@ for jockey_id in unique_jockey_ids:
     response.encoding = 'EUC-JP'
     html = response.text
     soup = BeautifulSoup(html, 'html.parser')
-    tables = soup.find_all('table')
-    jockey_table = str(tables[0])
+    target_table = soup.find('table', attrs={'summary': '年度別成績'})
+    jockey_table = str(target_table)
     df = pd.read_html(StringIO(jockey_table))[0]
     text = soup.select('div.db_head_name p')[0].text
     birth_year = int(re.findall(r'\d+', text)[0])

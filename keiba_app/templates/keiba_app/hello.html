@@ -1,12 +1,77 @@
 {% extends "layout.html" %}
 
 {% block content %}
+<script type="text/javascript" charset="utf-8" src="{{ url_for('static', filename='javascript/hello.js') }}"></script>
 <h1>オラ競馬予想すっぞ！</h1>
 <div class="container-fluid">
   <div class="center-block mt-4 mb-2">
-    <div class="text-center">
-      <h2>直近半年間のレース一覧</h2>
+    <div class="text-center sticky-top bg-primary">
+      <h3>今週のかけトク！？レース</h3>
+      <p id="last_updated"></p>
+      <p id="connect-success"></p>
+      <p id="message"></p>
     </div>
+    
+    <div class="container">
+      <div class="row">
+        <div class="col-1"></div>
+        <div class="col-10">
+          <p id="start_0"></p>
+          <table class="table table-striped" id="race_0">
+            <thead>
+              <tr></tr>
+            </thead>
+            <tbody>
+              
+            </tbody>
+          </table>
+          <table class="table table-striped" id="odds_0">
+            <thead>
+              <tr></tr>
+            </thead>
+            <tbody>
+              
+            </tbody>
+          </table>
+          <p id="start_1"></p>
+          <table class="table table-striped" id="race_1">
+            <thead>
+              <tr></tr>
+            </thead>
+            <tbody>
+              
+            </tbody>
+          </table>
+          <table class="table table-striped" id="odds_1">
+            <thead>
+              <tr></tr>
+            </thead>
+            <tbody>
+              
+            </tbody>
+          </table>
+          <p id="start_2"></p>
+          <table class="table table-striped" id="race_2">
+            <thead>
+              <tr></tr>
+            </thead>
+            <tbody>
+              
+            </tbody>
+          </table>
+          <table class="table table-striped" id="odds_2">
+            <thead>
+              <tr></tr>
+            </thead>
+            <tbody>
+              
+            </tbody>
+          </table>
+        </div>
+        <div class="col-1"></div>
+      </div>
+    </div>
+    
   </div>
 </div>
 {% endblock %}

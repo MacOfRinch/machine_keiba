@@ -8,8 +8,16 @@
 # db = SQLAlchemy(app)
 # migrate = Migrate(app, db)
 
-from keiba_app import app, load_model
+from keiba_app import create_app, load_model, socketio
+from keiba_app.scheduler_json import load_jobs_from_file
+
+app = create_app()
+def init_socket():
+  # 本番ではcorsきっちりやる
+  socketio.init_app(app, cors_allowed_origins="*", async_mode="eventlet")
 
 if __name__ == '__main__':
   load_model()
-  app.run()
+  load_jobs_from_file()
+  init_socket()
+  socketio.run(app, debug=False, port=8080)

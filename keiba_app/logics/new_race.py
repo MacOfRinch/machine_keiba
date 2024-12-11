@@ -1,14 +1,13 @@
 # 新しいレース情報が出たらスクレイピングし、分析に用いる準備をする
 # 実際に分析を行い表示するのはviews.py
 
-from keiba_app import app, db
+from keiba_app import db
 from ..models.horse import HorseModel
 from ..models.jockey import JockeyModel
 from ..models.race_calender import RaceCalenderModel
 from dateutil.relativedelta import relativedelta
 
 from sqlalchemy.orm import sessionmaker
-import requests
 import pandas as pd
 from bs4 import BeautifulSoup
 from io import StringIO
@@ -40,6 +39,7 @@ class NewRace:
       infomations.append({'title': title, 'race_id': race_id})
     # 取得した情報をrace_calenderテーブルに保存
     dates_list = db.session.query(RaceCalenderModel.race_date).all()
+    from main import app
     with app.app_context():
       for infomation in infomations:
         new_race_data = RaceCalenderModel(
@@ -82,8 +82,7 @@ class NewRace:
     str_race_table = str(shutuba_table)
     race_df = pd.read_html(StringIO(str_race_table))[0]
     race_df = race_df.rename(columns=lambda x: x.replace(' ', ''))
-    # 確認用 後で消すよ
-    print(race_df)
+    race_df.columns = ['_'.join(col).strip() if isinstance(col, tuple) else col for col in race_df.columns]
     horse_id_list = []
     jockey_id_list = []
     horse_link_list = race_soup.find('table', attrs={'class': 'Shutuba_Table'}).find_all('a', attrs={'href': re.compile(r'^https://db.netkeiba.com/horse/\d+')})
@@ -113,10 +112,9 @@ class NewRace:
     # 現時点では単勝・複勝のみ
     odds_table = odds_soup.find('table', attrs={'class': 'RaceOdds_HorseList_Table', 'id': 'Ninki'})
     str_odds_table = str(odds_table)
-    odds_df = pd.read_html(StringIO(str_odds_table))
+    odds_df = pd.read_html(StringIO(str_odds_table))[0]
     odds_df = odds_df.rename(columns=lambda x: x.replace(' ', ''))
-    # 確認用 あとで消すよ
-    print(odds_df)
+    odds_df = odds_df.drop(columns=['印'])
     # except Exception as e:
     #   print(e)
     #   return
@@ -130,9 +128,9 @@ class NewRace:
     """
     race_dt = dt.strptime(race_date, '%Y%m%d')
     # まずは新レースデータから騎手、馬idを抜き出しDBから各値をとってくる
-    # そのレースのhorse_id, jockey_idがDB内にあるのはscrapeメソッドで担保済み
     horse_id_list = df['horse_id'].to_list()
     jockey_id_list = df['jockey_id'].to_list()
+    from main import app
     with app.app_context():
       Session = sessionmaker(bind=db.engine)
       session = Session()

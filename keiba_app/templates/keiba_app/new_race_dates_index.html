@@ -20,7 +20,7 @@
             <tbody>
               {% for date in race_dates %}
               <tr>
-                <td><a href="{{ url_for('new_race_id_index', race_date=date) }}">{{ date }}</a></td>
+                <td><a href="{{ url_for('views.new_race_id_index', race_date=date) }}">{{ date }}</a></td>
               </tr>
               {% endfor %}
             </tbody>

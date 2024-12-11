@@ -31,7 +31,7 @@
             <tbody>
               {% for info in race_infomations %}
               <tr id="contents">
-                <td><a href="{{ url_for('show_new_race', race_id=info.race_id) }}">{{ info.race_id }}</a></td>
+                <td><a href="{{ url_for('views.show_new_race', race_id=info.race_id) }}">{{ info.race_id }}</a></td>
                 <td>{{ info.race_title }}</td>
                 {% if df['predict_flag'].all() %}
                 <td></td>

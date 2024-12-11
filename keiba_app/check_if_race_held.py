@@ -4,7 +4,6 @@ import sys
 import os
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from keiba_app import app
 from keiba_app import db
 from datetime import date as d
 from datetime import datetime as dt
@@ -15,51 +14,63 @@ import time
 import re
 from models.race_calender import RaceCalenderModel
 
-with app.app_context():
-  race_date_datum = db.session.query(RaceCalenderModel).all()
-  dates_list = [date.race_date for date in race_date_datum]
-
 def add_new_data():
   day = d.today()
-  while day < d.today() + relativedelta(days=4):
-    half_year_later = day + relativedelta(months=6)
-    options = webdriver.ChromeOptions()
-    options.add_argument('--headless')
-    options.add_argument('--disable-gpu')
-    options.add_argument('--hide-scrollbars')
-    options.add_argument('--no-sandbox')
-    driver = webdriver.Chrome(options=options)
-    url = 'https://race.netkeiba.com/top/?kaisai_date=' + day.strftime('%Y%m%d')
-    driver.get(url)
-    time.sleep(1)
-    html = driver.page_source
+  half_year_later = day + relativedelta(months=6)
+  options = webdriver.ChromeOptions()
+  options.add_argument('--headless')
+  options.add_argument('--disable-gpu')
+  options.add_argument('--hide-scrollbars')
+  options.add_argument('--no-sandbox')
+  driver = webdriver.Chrome(options=options)
+  url = 'https://race.netkeiba.com/top/?kaisai_date=' + day.strftime('%Y%m%d')
+  driver.get(url)
+  time.sleep(1)
+  html = driver.page_source
 
-    soup = BeautifulSoup(html, 'html.parser')
-    # この要素があればレースあり
-    if soup.find_all('div', attrs={'class': 'RaceList_Box'}):
-      # レースの概要を取得
-      infomations = []
-      link_list = soup.find('div', attrs={'class': 'RaceList_Box'}).find_all('a', attrs={'href': re.compile(r'^../race/(shutuba|result)\.html')})
-      for link in link_list:
-        title = link.select('span.ItemTitle')[0].text
-        race_id = ''.join(re.findall(r'\d+', link['href']))
-        infomations.append({'title': title, 'race_id': race_id})
-      with app.app_context():
-        for infomation in infomations:
-          race_dates = RaceCalenderModel(
-            race_date=day.strftime('%Y%m%d'),
-            race_title=infomation['title'],
-            race_id=infomation['race_id'],
-            expires_at=half_year_later
-          )
-          if not race_dates.race_date in dates_list:
-            db.session.add(race_dates)
-        db.session.commit()
-    day += relativedelta(days=1)
-    time.sleep(5)
+  soup = BeautifulSoup(html, 'html.parser')
+  # この要素があればレースあり
+  if soup.find_all('div', attrs={'class': 'RaceList_Box'}):
+    # レースの概要を取得
+    infomations = []
+    link_list = soup.find('div', attrs={'class': 'RaceList_Box'}).find_all('a', attrs={'href': re.compile(r'^../race/(shutuba|result)\.html')})
+    for link in link_list:
+      title = link.select('span.ItemTitle')[0].text
+      race_id = ''.join(re.findall(r'\d+', link['href']))
+      sub_url = 'https://race.netkeiba.com/race/shutuba.html?race_id=' + race_id
+      driver.get(sub_url)
+      time.sleep(1)
+      shutuba_html = driver.page_source
+      shutuba_soup = BeautifulSoup(shutuba_html, 'html.parser')
+      # try:
+      sub_text = shutuba_soup.find('div', attrs={'class': 'RaceData01'}).text
+      start_at = ''.join(re.findall(r'\d{1,2}:\d{1,2}', sub_text)[0])
+      infomations.append({'title': title, 'race_id': race_id, 'start_at': start_at})
+      time.sleep(3)
+      # except Exception as e:
+      #   print(e)
+      #   time.sleep(3)
+      #   continue
+    from main import app
+    with app.app_context():
+      race_date_datum = db.session.query(RaceCalenderModel).all()
+      dates_list = [date.race_date for date in race_date_datum]
+      for infomation in infomations:
+        race_dates = RaceCalenderModel(
+          race_date=day.strftime('%Y%m%d'),
+          race_title=infomation['title'],
+          race_id=infomation['race_id'],
+          start_at=infomation['start_at'],
+          expires_at=half_year_later
+        )
+        if not race_dates.race_date in dates_list:
+          db.session.add(race_dates)
+      db.session.commit()
 
 def delete_old_data():
+  from main import app
   with app.app_context():
+    race_date_datum = db.session.query(RaceCalenderModel).all()
     for date_data in race_date_datum:
       expires_date = date_data.expires_at
       if expires_date < d.today():

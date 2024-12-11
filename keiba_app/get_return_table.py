@@ -3,7 +3,8 @@ import sys
 import os
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from keiba_app import app, db
+from keiba_app import db
+from main import app
 from models.race_calender import RaceCalenderModel
 from models.race_result import RaceResultModel
 from models.return_table import ReturnTableModel

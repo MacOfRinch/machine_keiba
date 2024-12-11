@@ -1,8 +1,11 @@
 from dotenv import load_dotenv
 import os
 
-DEBUG = True
+# タスクの多重登録を防ぐため一時的にDEBUG = Falseにしている
+DEBUG = False
 JSON_AS_ASCII = False
+SCHEDULER_API_ENABLED = True
+SCHEDULER_TIMEZONE = 'Asia/Tokyo'
 
 # DB接続設定
 load_dotenv()

@@ -4,7 +4,7 @@
 <div class="center-block">
   <h1 class="text-center">オラ競馬予想すっぞ！</h1>
   <div class="fixed-top">
-    <a href="{{ url_for('new_race_date_index') }}">新しいレース日程</a>
+    <a href="{{ url_for('views.new_race_date_index') }}">新しいレース日程</a>
   </div>
 </div>
 <div class="container-fluid">
@@ -26,7 +26,7 @@
               {% for data in race_data %}
               <tr>
                 <td>{{ data.race_date }}</td>
-                <td><a href="{{ url_for('show_race_detail', race_id=data.race_id) }}">{{ data.race_id }}</a></td>
+                <td><a href="{{ url_for('views.show_race_detail', race_id=data.race_id) }}">{{ data.race_id }}</a></td>
                 {% if data.predict_flag == True %}
                 <td>OK</td>
                 {% elif data.predict_flag == False %}

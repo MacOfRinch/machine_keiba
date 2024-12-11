@@ -1,15 +1,26 @@
 {% extends "layout.html" %}
 
 {% block content %}
+<script type="text/javascript" charset="utf-8" src="{{ url_for('static', filename='javascript/websocket.js') }}"></script>
 <div class="container-fluid">
   <div class="center-block mt-4 mb-2">
     <div class="text-center">
       <h2>最新のレース情報はありません</h2>
-      <p>※更新日時: 毎週金曜日AM1:00頃</p>
+      <p>※更新日時: AM1:00頃</p>
+      <p id="last_updated"></p>
+      <p id="connect-success"></p>
+      <table class="table table-striped" id="race_table">
+        <thead>
+          <tr></tr>
+        </thead>
+        <tbody>
+          
+        </tbody>
+      </table>
     </div>
     <div class="text-center mt-4">
       <p>過去のレース情報・予測結果を見てみますか？</p>
-      <a href="{{ url_for('index') }}" class="btn btn-primary">見る</a>
+      <a href="{{ url_for('views.index') }}" class="btn btn-primary">見る</a>
     </div>
   </div>
 </div>

@@ -1,24 +1,83 @@
 {% extends "layout.html" %}
 
 {% block content %}
+<script type="text/javascript" charset="utf-8" src="{{ url_for('static', filename='javascript/websocket.js') }}"></script>
 <div class="container-fluid">
   <div class="center-block mt-4 mb-2">
-    <div class="text-center sticky-top">
-      <h3>今週のかけトク！？レース</h3>
-      <p id="updated">{{ updated_at }}</p>
+    <div class="text-center bg-light sticky-top">
+      <h2>今週のかけトク！？レース</h2>
+      <h3 id="no-races"></h3>
+      <p id="demo-page"></p>
+      <p id="last_updated"></p>
+      <p id="connect-success"></p>
     </div>
-    {% for table in data_tables %}
     <div class="container">
       <div class="row">
         <div class="col-1"></div>
         <div class="col-10">
-          <p>かけトク度: {{ table.kaketoku }}</p>
-          {{ table.to_html(classes='table table-striped') | safe }}
+          <table class="table table-striped" id="race_table">
+            <thead>
+              <tr></tr>
+            </thead>
+            <tbody>
+              
+            </tbody>
+          </table>
+          <p id="start_0"></p>
+          <table class="table table-striped" id="race_0">
+            <thead>
+              <tr></tr>
+            </thead>
+            <tbody>
+              
+            </tbody>
+          </table>
+          <table class="table table-striped" id="odds_0">
+            <thead>
+              <tr></tr>
+            </thead>
+            <tbody>
+              
+            </tbody>
+          </table>
+          <p id="start_1"></p>
+          <table class="table table-striped" id="race_1">
+            <thead>
+              <tr></tr>
+            </thead>
+            <tbody>
+              
+            </tbody>
+          </table>
+          <table class="table table-striped" id="odds_1">
+            <thead>
+              <tr></tr>
+            </thead>
+            <tbody>
+              
+            </tbody>
+          </table>
+          <p id="start_2"></p>
+          <table class="table table-striped" id="race_2">
+            <thead>
+              <tr></tr>
+            </thead>
+            <tbody>
+              
+            </tbody>
+          </table>
+          <table class="table table-striped" id="odds_2">
+            <thead>
+              <tr></tr>
+            </thead>
+            <tbody>
+              
+            </tbody>
+          </table>
         </div>
         <div class="col-1"></div>
       </div>
     </div>
-    {% endfor %}
   </div>
 </div>
 {% endblock %}

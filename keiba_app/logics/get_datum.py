@@ -5,17 +5,15 @@ from io import StringIO
 import re
 from datetime import datetime as dt
 from dateutil.relativedelta import relativedelta
-from keiba_app import app, db
-from ..models.race_result import RaceResultModel
-from ..models.horse import HorseModel
-from ..models.jockey import JockeyModel
-
-half_year_later = dt.today() + relativedelta(months=6)
-this_year = int(dt.today().year)
+from sqlalchemy.orm.attributes import flag_modified
+from keiba_app import db
+from ..models.services import RaceResultModel
+from ..models.services import HorseModel
+from ..models.services import JockeyModel
 
 class UpdateDatum:
   @staticmethod
-  def get_race_data(race_id: str) -> dict:
+  def get_race_data(race_id: str, app) -> dict:
     url = "https://db.netkeiba.com/race/" + race_id + "/"
     header = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36'}
     session = requests.Session()
@@ -23,8 +21,8 @@ class UpdateDatum:
     response.encoding = "EUC-JP"
 
     soup = BeautifulSoup(response.text, "html.parser")
-    tables = soup.find_all('table')
-    data_table = str(tables[0])
+    target_table = soup.find('table', attrs={'summary': 'レース結果'})
+    data_table = str(target_table)
     df = pd.read_html(StringIO(data_table))[0]
     # 半角スペースがあったら除去
     df = df.rename(columns=lambda x: x.replace(' ', ''))
@@ -79,7 +77,7 @@ class UpdateDatum:
     return {'horse_id_list': horse_id_list, 'jockey_id_list': jockey_id_list}
 
   @staticmethod
-  def get_horse_data(horse_id: str, race_date) -> None:
+  def get_horse_data(horse_id: str, race_date, app) -> None:
     url = 'https://db.netkeiba.com/horse/' + horse_id + '/'
     header = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36'}
     session = requests.Session()
@@ -107,7 +105,7 @@ class UpdateDatum:
       order_ave = sum(rows) / len(rows)
     except ZeroDivisionError:
       order_ave = None
-    
+
     with app.app_context():
       horse_id_list = [horse_id[0] for horse_id in db.session.query(HorseModel.horse_id).all()]
       horse_info = db.session.query(HorseModel).filter(HorseModel.horse_id == horse_id).first()
@@ -116,6 +114,7 @@ class UpdateDatum:
         order_ave_data = horse_info.order_ave_info
         order_ave_data[str(race_date)] = order_ave
         horse_info.order_ave_info = order_ave_data
+        flag_modified(horse_info, 'order_ave_info')
         horse_info.expires_at = race_date + relativedelta(months=6)
       elif horse_id not in horse_id_list:
         order_ave_data = {}
@@ -130,7 +129,9 @@ class UpdateDatum:
     return
 
   @staticmethod
-  def get_jockey_data(jockey_id: str) -> None:
+  def get_jockey_data(jockey_id: str, app) -> None:
+    half_year_later = dt.today() + relativedelta(months=6)
+    this_year = int(dt.today().year)
     url = 'https://db.netkeiba.com/jockey/result/' + jockey_id + '/'
     header = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36'}
     session = requests.Session()
