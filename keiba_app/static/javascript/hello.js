@@ -54,8 +54,11 @@ document.addEventListener("DOMContentLoaded", () => {
     const tableIds = ['race_0', 'odds_0', 'race_1', 'odds_1', 'race_2', 'odds_2'];
     const datum = [JSON.parse(data.race_0), JSON.parse(data.odds_0), JSON.parse(data.race_1), JSON.parse(data.odds_1), JSON.parse(data.race_2), JSON.parse(data.odds_2)];
     nowTime.textContent = `最終更新: ${data.time}`;
+    document.getElementById('start_0').textContent = `出走時間: ${data.start_0}`
+    document.getElementById('start_1').textContent = `出走時間: ${data.start_1}`
+    document.getElementById('start_2').textContent = `出走時間: ${data.start_2}`
     tableIds.forEach((tableId, index) =>{
-      createTable(datum[index], tableId);
+      updateTable(datum[index], tableId);
     });
   });
 
@@ -66,9 +69,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // ヘッダーを生成
     if (!headerRow.hasChildNodes()) {
-        Object.keys(data[0]).forEach(key => {
+        Object.keys(data[0]).forEach(header => {
             const th = document.createElement('th');
-            th.textContent = key;
+            th.textContent = header.replace(/_.*/g, '');
             headerRow.appendChild(th);
         });
     }
@@ -79,7 +82,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const tr = document.createElement('tr');
         Object.values(row).forEach(value => {
             const td = document.createElement('td');
-            td.textContent = value;
+            td.textContent = typeof value === 'number' ? value.toFixed(2) : value;
             tr.appendChild(td);
         });
         tbody.appendChild(tr);
@@ -96,7 +99,7 @@ document.addEventListener("DOMContentLoaded", () => {
       const headers = Object.keys(data[0]);
       headers.forEach(header => {
         const th = document.createElement('th');
-        th.textContent = header.replace(/_/g, ''); // "_"を削除して表示を簡潔に
+        th.textContent = header.replace(/_.*/g, ''); // "_"を削除して表示を簡潔に
         thead.appendChild(th);
       });
     }

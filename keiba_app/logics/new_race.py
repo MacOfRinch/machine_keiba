@@ -8,7 +8,6 @@ from ..models.race_calender import RaceCalenderModel
 from dateutil.relativedelta import relativedelta
 
 from sqlalchemy.orm import sessionmaker
-import requests
 import pandas as pd
 from bs4 import BeautifulSoup
 from io import StringIO
@@ -53,7 +52,6 @@ class NewRace:
           db.session.add(new_race_data)
       db.session.commit()
 
-# 「印」カラムを消す
   @staticmethod
   def scrape(new_race_id: str) -> dict:
     race_url = 'https://race.netkeiba.com/race/shutuba.html?race_id=' + new_race_id
@@ -114,8 +112,6 @@ class NewRace:
     # 現時点では単勝・複勝のみ
     odds_table = odds_soup.find('table', attrs={'class': 'RaceOdds_HorseList_Table', 'id': 'Ninki'})
     str_odds_table = str(odds_table)
-    # 確認用
-    print(pd.read_html(StringIO(str_odds_table)))
     odds_df = pd.read_html(StringIO(str_odds_table))[0]
     odds_df = odds_df.rename(columns=lambda x: x.replace(' ', ''))
     odds_df = odds_df.drop(columns=['印'])
@@ -132,7 +128,6 @@ class NewRace:
     """
     race_dt = dt.strptime(race_date, '%Y%m%d')
     # まずは新レースデータから騎手、馬idを抜き出しDBから各値をとってくる
-    # そのレースのhorse_id, jockey_idがDB内にあるのはscrapeメソッドで担保済み
     horse_id_list = df['horse_id'].to_list()
     jockey_id_list = df['jockey_id'].to_list()
     from main import app

@@ -69,14 +69,11 @@ def emit_main_test_data(datum):
   global latest_data
   latest_data = {'message': 'こんちわ！', 'time': dt.strftime(dt.now(), '%H:%M:%S')}
   now_time = latest_data['time'] or dt.strftime(dt.now(), '%H:%M:%S')
-  print(datum)
-  print('--------------------------------------')
-  print(datum[0]['race_data'])
   socketio.emit(
     'update_main_tables',
     {'time': now_time, 'message': 'うまくいくかなぁ',
-      'race_0': json.dumps(datum[0]['race_data']), 'odds_0': json.dumps(datum[0]['odds_data']),
-      'race_1': json.dumps(datum[1]['race_data']), 'odds_1': json.dumps(datum[1]['odds_data']),
-      'race_2': json.dumps(datum[2]['race_data']), 'odds_2': json.dumps(datum[2]['odds_data'])
+      'race_0': json.dumps(datum[0]['race_data']), 'odds_0': json.dumps(datum[0]['odds_data']), 'start_0': datum[0]['start_at'],
+      'race_1': json.dumps(datum[1]['race_data']), 'odds_1': json.dumps(datum[1]['odds_data']), 'start_1': datum[1]['start_at'],
+      'race_2': json.dumps(datum[2]['race_data']), 'odds_2': json.dumps(datum[2]['odds_data']), 'start_2': datum[2]['start_at']
     }, namespace='/hello'
   )

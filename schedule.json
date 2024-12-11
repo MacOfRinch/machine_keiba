@@ -8,8 +8,8 @@
         "trigger_args": "hour='1', minute='0', second='0'"
     },
     {
-        "id": "main_test",
-        "func": "keiba_app.scheduled_jobs:main_test",
+        "id": "test",
+        "func": "keiba_app.scheduled_jobs:test",
         "trigger": "cron",
         "args": [],
         "kwargs": {},

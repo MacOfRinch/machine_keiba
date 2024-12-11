@@ -11,9 +11,6 @@ from ..models.services import RaceResultModel
 from ..models.services import HorseModel
 from ..models.services import JockeyModel
 
-half_year_later = dt.today() + relativedelta(months=6)
-this_year = int(dt.today().year)
-
 class UpdateDatum:
   @staticmethod
   def get_race_data(race_id: str, app) -> dict:
@@ -133,6 +130,8 @@ class UpdateDatum:
 
   @staticmethod
   def get_jockey_data(jockey_id: str, app) -> None:
+    half_year_later = dt.today() + relativedelta(months=6)
+    this_year = int(dt.today().year)
     url = 'https://db.netkeiba.com/jockey/result/' + jockey_id + '/'
     header = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.102 Safari/537.36'}
     session = requests.Session()

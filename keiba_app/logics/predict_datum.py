@@ -54,7 +54,6 @@ class PredictDatum:
 
   @staticmethod
   def predict(race_id: str) -> dict:
-    # 過去全レースでの予測結果をDBに保存
     from main import app
     with app.app_context():
       q = db.session.query(RaceResultModel).filter(RaceResultModel.race_id == race_id)
@@ -81,20 +80,22 @@ class PredictDatum:
       top_odds = race_df['odds'].tolist()
       top_se = pd.Series(top_odds, index=race_df_index)
       df['単勝オッズ'] = top_se
-      return_index = []
-      for _, row in df.iterrows():
-        try:
-          if float(row['単勝オッズ']) <= 130:
-            return_index.append(row['競走力指数'] * float(row['単勝オッズ']))
-          else:
-            return_index.append(row['競走力指数'] * 130)
-        except Exception:
-          return_index.append(0)
-      df['回収指数'] = pd.Series(return_index, index=race_df_index)
+      race_df['競走力指数'] = [x * 100 / sum(prediction) for x in prediction]
+      # もっと吟味する必要あり
+      # return_index = []
+      # for _, row in df.iterrows():
+      #   try:
+      #     if float(row['単勝オッズ']) <= 130:
+      #       return_index.append(row['競走力指数'] * float(row['単勝オッズ']))
+      #     else:
+      #       return_index.append(row['競走力指数'] * 130)
+      #   except Exception:
+      #     return_index.append(0)
+      # df['回収指数'] = pd.Series(return_index, index=race_df_index)
     else:
       df = None
     return_table = db.session.query(ReturnTableModel).filter(ReturnTableModel.race_id == race_id).first()
     return_data = return_table.return_data
     return_df = pd.DataFrame(return_data)
 
-    return {'data': df, 'return': return_df}
+    return {'data': df, 'race_data': race_df, 'return': return_df}

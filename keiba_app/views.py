@@ -29,26 +29,18 @@ bp = Blueprint('views', __name__)
 @bp.route('/')
 def main_display():
   # 近レースの予想と今までの的中率・回収率、おすすめの賭け方を提示するページ
-  scheduled_race_data = db.session.query(RaceCalenderModel).all()
-  future_race_ids = []
-  for scheduled_race in scheduled_race_data:
-    date = scheduled_race.race_date
-    if dt.strptime(date, '%Y%m%d') >= dt.now():
-      future_race_ids.append(scheduled_race.race_id)
-  race_predictions = []
-  return_tables = []
-  updated_at = f'最終更新: {dt.now().strftime("%m/%d %H:%M:%S")}'
-  if bool(future_race_ids):
-    race_predictions = [PredictDatum.predict(race_id)['data'] for race_id in future_race_ids]
-    return_tables = [PredictDatum.predict(race_id)['return'] for race_id in future_race_ids]
-    return render_template('keiba_app/main_display.html', data_tables=race_predictions, return_tables=return_tables, updated_at=updated_at)
-  else:
-    # races = db.session.query(RaceResultModel).filter(RaceResultModel.race_date == '20241201').all()
-    # selected_race = random.choice(races)
-    # from keiba_app.scheduled_jobs import test
-    # selected_race = test()
-    # prediction = PredictDatum.predict(selected_race.race_id)['data']
-    return render_template('keiba_app/no_races.html')
+  # scheduled_race_data = db.session.query(RaceCalenderModel).all()
+  # future_race_ids = []
+  # for scheduled_race in scheduled_race_data:
+  #   date = scheduled_race.race_date
+  #   if dt.strptime(date, '%Y%m%d') >= dt.now():
+  #     future_race_ids.append(scheduled_race.race_id)
+  # race_predictions = []
+  # return_tables = []
+  # updated_at = f'最終更新: {dt.now().strftime("%m/%d %H:%M:%S")}'
+  # race_predictions = [PredictDatum.predict(race_id)['data'] for race_id in future_race_ids]
+  # return_tables = [PredictDatum.predict(race_id)['return'] for race_id in future_race_ids]
+  return render_template('keiba_app/main_display.html')
 
 @bp.route('/races')
 def index():
