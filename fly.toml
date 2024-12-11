@@ -21,4 +21,7 @@ primary_region = 'nrt'
 
 [build]
   builder = "paketobuildpacks/builder:base"
-  buildpacks = ["gcr.io/paketo-buildpacks/nodejs"]
+  buildpacks = ["paketo-buildpacks/python"]
+
+[deploy]
+command = "python main.py"

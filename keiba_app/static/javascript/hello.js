@@ -1,4 +1,4 @@
-const socket = io.connect("http://" + document.domain + ":" + location.port + '/hello', {
+const socket = io.connect("https://" + document.domain + ":" + location.port + '/hello', {
   transports: ["websocket"],
   reconnection: true,
   reconnectionAttempts: 5,
