@@ -15,7 +15,7 @@ latest_data = {'message': '初期データ', 'time': dt.strftime(dt.now(), '%H:%
 connected_clients = set()
 
 @socketio.on('connect', namespace='/')
-def handle_connect():
+def handle_connect(_):
   client_id = request.sid
   connected_clients.add(client_id)
   print(f'コネクションが確立されました! クライアントID: {client_id}')

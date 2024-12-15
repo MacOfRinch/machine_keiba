@@ -20,4 +20,4 @@ if __name__ == '__main__':
   load_model()
   load_jobs_from_file()
   init_socket()
-  socketio.run(app, debug=False, port=8080)
+  socketio.run(app, debug=False, host='0.0.0.0', port=8080)
