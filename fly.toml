@@ -1,4 +1,4 @@
-# fly.toml app configuration file generated for horse-kaketoku on 2024-12-12T04:22:50+09:00
+# fly.toml app configuration file generated for horse-kaketoku on 2024-12-19T13:49:56+09:00
 #
 # See https://fly.io/docs/reference/configuration/ for information about how to use this file.
 #
@@ -7,7 +7,16 @@ app = 'horse-kaketoku'
 primary_region = 'nrt'
 
 [build]
-  release_command = 'python main.py'
+
+[services]
+  internal_port = 8080
+  protocol = "tcp"
+  [[services.ports]]
+    handlers = ["http"]
+    port = 80
+  [[services.ports]]
+    handlers = ["tls"]
+    port = 443
 
 [http_service]
   internal_port = 8080
@@ -15,23 +24,9 @@ primary_region = 'nrt'
   auto_stop_machines = false
   auto_start_machines = true
   min_machines_running = 0
+  processes = ['app']
 
 [[vm]]
   memory = '2gb'
   cpu_kind = 'shared'
   cpus = 1
-
-[env]
-  FLASK_APP = "main.py"
-  
-[[services]]
-  internal_port = 8080
-  protocol = "tcp"
-  [[services.ports]]
-    force_https = true
-    handlers = ["http"]
-    port = 80
-
-  [[services.ports]]
-    handlers = ["tls", "http"]
-    port = 443
